@@ -1,0 +1,33 @@
+version: '2.0'
+services:
+  mariadb:
+    container_name: appbudget-mdb
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - database-data:/var/lib/mysql
+      - ./sql:/sql
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+
+  adminer:
+    container_name: appbudget-adm
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  app:
+    image: appbudget
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mariadb
+
+volumes:
+  database-data:
