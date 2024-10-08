@@ -10,22 +10,30 @@ import java.sql.Statement;
 import java.sql.SQLException;
 
 public class App {
-	//private static final Logger logger = LogManager.getLogger(App.class);
+	// private static final Logger logger = LogManager.getLogger(App.class);
 
-	public static void main(String[] args) throws InterruptedException {
-		String url = "jdbc:mariadb://mariadb:3306/appbudgetdb";
-		String username = "root";
-		String password = "rootpassword";
+	public static void main(String[] args) {
 
-		try (
-				Connection connection = DriverManager.getConnection(url, username, password);
-				Statement statement = connection.createStatement();
-				ResultSet resultSet = statement.executeQuery("SELECT 'Pippo' AS message")) {
+		String url = "jdbc:mariadb://db:3306/myDb"; // Replace with your database name
+		String user = "myuser"; // Replace with your database name
+		String password = "mypass"; // Replace with your database name
 
-			if (resultSet.next()) {
-				System.out.println(resultSet.getString("message"));
-			}
+		try {
+			Connection conn = DriverManager.getConnection(url, user, password);
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT 'Hello World!'");
+			rs.first();
+			System.out.println(rs.getString(1));
+			String createTableSQL = "CREATE TABLE IF NOT EXISTS customers (\n"
+					+ "  id INT PRIMARY KEY AUTO_INCREMENT,\n" + "  name VARCHAR(50),\n" + "  email VARCHAR(50)\n"
+					+ ")";
 
+			stmt.executeUpdate(createTableSQL);
+
+			stmt.close();
+			conn.close();
+
+			System.out.println("Table created successfully");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
