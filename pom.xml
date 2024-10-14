@@ -6,17 +6,13 @@
 	<groupId>ast.projects</groupId>
 	<artifactId>appbudget</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-
 	<name>appbudget</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-
-		<sonar.coverage.exclusions>
-			**/model/*.*
-		</sonar.coverage.exclusions>
+		<testcontainers.version>1.19.3</testcontainers.version>
 
 		<sonar.junit.reportPaths>
 			${project.build.directory}/surefire-reports,
@@ -25,10 +21,12 @@
 	</properties>
 
 	<dependencies>
+
+		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.11</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -38,57 +36,110 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>4.4.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mariadb</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>2.1.214</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-swing-junit</artifactId>
+			<version>3.17.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Runtime dependencies -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>3.4.1</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.36</version>	
+		</dependency>
+
+		<!-- Hibernate dependencies -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>5.6.15.Final</version>
+		</dependency>
+
+		<!-- Logging dependencies -->
+		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.23.1</version>
+			<version>2.17.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.23.1</version>
+			<version>2.17.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-			<artifactId>mariadb-java-client</artifactId>
-			<version>3.1.2</version>
-		</dependency>
-	</dependencies>
 
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/it/java</source>
+								<source>src/e2e/java</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
 				<configuration>
-					<targetClasses>
-						<!-- TODO: change me -->
-						<param>ast.projects.appbudget.App*</param>
-					</targetClasses>
-					<targetTests>
-						<!-- TODO: change me -->
-						<param>ast.projects.appbudget.*</param>
-					</targetTests>
-					<mutators>
-						<mutator>DEFAULTS</mutator>
-					</mutators>
-					<!-- TODO: change me -->
-					<mutationThreshold>0</mutationThreshold>
+					<environmentVariables>
+						<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+					</environmentVariables>
 				</configuration>
-				<executions>
-					<execution>
-						<phase>test</phase>
-						<goals>
-							<goal>mutationCoverage</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<excludes>
-						<exclude>**/Main.*</exclude>
+						<exclude>**/BudgetSwingApp.*</exclude>
+						<exclude>**/src/test/java**</exclude>
+						<exclude>**/src/it/java**</exclude>
+						<exclude>**/src/e2e/java**</exclude>
+						<exclude>**/User.*</exclude>
 					</excludes>
 				</configuration>
 				<executions>
@@ -111,8 +162,7 @@
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
-											<!-- TODO: change me -->
-											<minimum>0.00</minimum>
+											<minimum>0</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -136,31 +186,39 @@
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<mainClass>ast.projects.appbudget.App</mainClass>
+									<mainClass>
+										ast.projects.appbudget.app.BudgetSwingApp</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.1</version>
 				<executions>
 					<execution>
-						<id>run-jar-with-dependencies</id>
-						<phase>verify</phase>
 						<goals>
-							<goal>exec</goal>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>e2e-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 						<configuration>
-							<executable>java</executable>
-							<arguments>
-								<argument>-jar</argument>
-								<argument>
-									${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</argument>
-							</arguments>
+							<excludes>
+								<exclude>**/*IT.java</exclude>
+							</excludes>
+							<includes>
+								<include>**/*E2E.java</include>
+							</includes>
 						</configuration>
 					</execution>
 				</executions>
@@ -178,8 +236,6 @@
 					<artifactId>coveralls-maven-plugin</artifactId>
 					<version>4.3.0</version>
 					<dependencies>
-						<!-- This is required when using JDK 9 or higher since
-					javax.xml.bind has been removed from the JDK -->
 						<dependency>
 							<groupId>javax.xml.bind</groupId>
 							<artifactId>jaxb-api</artifactId>
@@ -215,6 +271,35 @@
 					<groupId>org.pitest</groupId>
 					<artifactId>pitest-maven</artifactId>
 					<version>1.5.2</version>
+					<configuration>
+						<jvmArgs>
+		                    <jvmArg>-Djava.awt.headless=false</jvmArg>
+		                </jvmArgs>
+						<targetClasses>
+							<param>ast.projects.appbudget.controller.*</param>
+							<param>ast.projects.appbudget.views.*</param>
+							<param>ast.projects.appbudget.repository.*</param>
+						</targetClasses>
+						<targetTests>
+							<param>ast.projects.appbudget.*</param>
+						</targetTests>
+						<mutators>
+							<mutator>DEFAULTS</mutator>
+						</mutators>
+						 <excludedTestClasses>
+    						<param>ast.projects.appbudget.**.*IT</param>
+    						<param>ast.projects.appbudget.**.*E2E</param>
+					    </excludedTestClasses>
+					    <!-- <mutationThreshold>0</mutationThreshold>-->
+					</configuration>
+					<executions>
+						<execution>
+							<phase>test</phase>
+							<goals>
+								<goal>mutationCoverage</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
@@ -229,12 +314,10 @@
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.9.1</version>
 				</plugin>
-
 			</plugins>
 		</pluginManagement>
 
 	</build>
-
 	<profiles>
 		<profile>
 			<id>docker</id>
@@ -247,7 +330,6 @@
 						<configuration>
 							<showLogs>true</showLogs>
 							<verbose>build</verbose>
-							<!--<dockerHost>unix:///home/marco/.docker/desktop/docker.sock</dockerHost>-->
 							<autoCreateCustomNetworks>true</autoCreateCustomNetworks>
 							<images>
 								<image>
@@ -257,7 +339,8 @@
 										<contextDir>${project.basedir}</contextDir>
 										<args>
 											<jarToCopy>
-												${project.artifactId}-${project.version}-jar-with-dependencies.jar</jarToCopy>
+												${project.artifactId}-${project.version}-jar-with-dependencies.jar
+											</jarToCopy>
 										</args>
 									</build>
 									<run>
@@ -266,7 +349,7 @@
 											<name>app-network</name>
 										</network>
 										<wait>
-											<log>Hello World!</log>
+											<log>App stated</log>
 											<time>10000</time>
 										</wait>
 										<dependsOn>
@@ -284,27 +367,23 @@
 											<timeout>50s</timeout>
 											<retries>3</retries>
 											<start-period>20s</start-period>
-											<cmd>healthcheck.sh --connect
-												--innodb_initialized</cmd>
+											<cmd>["sh", "-c", "healthcheck.sh --connect --innodb_initialized"]</cmd>
 										</healthCheck>
-										<assembly>
-											<mode>dir</mode>
-											<targetDir>
-												/docker-entrypoint-initdb.d</targetDir>
-											<inline>
-												<files>
-													<file>
-														<source>
-															./sql/schema.sql</source>
-													</file>
-												</files>
-											</inline>
-										</assembly>
+<!--										<assembly>-->
+<!--											<mode>dir</mode>-->
+<!--											<targetDir>-->
+<!--												/docker-entrypoint-initdb.d</targetDir>-->
+<!--											<inline>-->
+<!--												<files>-->
+<!--													<file>-->
+<!--														<source>-->
+<!--															./sql/initializer.sql</source>-->
+<!--													</file>-->
+<!--												</files>-->
+<!--											</inline>-->
+<!--										</assembly>-->
 										<env>
-											<MARIADB_ROOT_PASSWORD>mypass</MARIADB_ROOT_PASSWORD>
-											<MARIADB_DATABASE>myDb</MARIADB_DATABASE>
-											<MARIADB_USER>myuser</MARIADB_USER>
-											<MARIADB_PASSWORD>mypass</MARIADB_PASSWORD>
+											<MARIADB_ALLOW_EMPTY_ROOT_PASSWORD>yes</MARIADB_ALLOW_EMPTY_ROOT_PASSWORD>
 										</env>
 									</build>
 									<run>
@@ -324,55 +403,6 @@
 						<executions>
 							<execution>
 								<id>docker-build-image</id>
-								<phase>package</phase>
-								<goals>
-									<goal>build</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>docker-verify</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>start</goal>
-									<goal>stop</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>dockercompose</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>io.fabric8</groupId>
-						<artifactId>docker-maven-plugin</artifactId>
-						<version>0.39.1</version>
-						<configuration>
-							<showLogs>true</showLogs>
-							<images>
-								<image>
-									<alias>app</alias>
-									<name>appbudget</name>
-									<external>
-										<type>compose</type>
-										<basedir>${project.basedir}</basedir>
-										<composeFile>docker-compose.yml</composeFile>
-									</external>
-									<run>
-										<wait>
-											<log>Pippo</log>
-											<time>60000</time>
-										</wait>
-									</run>
-								</image>
-							</images>
-						</configuration>
-						<executions>
-							<execution>
-								<id>docker-build</id>
 								<phase>package</phase>
 								<goals>
 									<goal>build</goal>
