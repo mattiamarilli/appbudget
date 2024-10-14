@@ -121,32 +121,14 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+		<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
 				<configuration>
-					<targetClasses>
-						<!-- TODO: change me -->
-						<param>ast.projects.appbudget.App*</param>
-					</targetClasses>
-					<targetTests>
-						<!-- TODO: change me -->
-						<param>ast.projects.appbudget.*</param>
-					</targetTests>
-					<mutators>
-						<mutator>DEFAULTS</mutator>
-					</mutators>
-					<!-- TODO: change me -->
-					<mutationThreshold>0</mutationThreshold>
+					<environmentVariables>
+						<TESTCONTAINERS_RYUK_DISABLED>true</TESTCONTAINERS_RYUK_DISABLED>
+					</environmentVariables>
 				</configuration>
-				<!--				<executions>
-					<execution>
-						<phase>test</phase>
-						<goals>
-							<goal>mutationCoverage</goal>
-						</goals>
-					</execution>
-				</executions>-->
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -180,7 +162,7 @@
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.00</minimum>
+											<minimum>0</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -289,6 +271,35 @@
 					<groupId>org.pitest</groupId>
 					<artifactId>pitest-maven</artifactId>
 					<version>1.5.2</version>
+					<configuration>
+						<jvmArgs>
+		                    <jvmArg>-Djava.awt.headless=false</jvmArg>
+		                </jvmArgs>
+						<targetClasses>
+							<param>ast.projects.appbudget.controller.*</param>
+							<param>ast.projects.appbudget.views.*</param>
+							<param>ast.projects.appbudget.repository.*</param>
+						</targetClasses>
+						<targetTests>
+							<param>ast.projects.appbudget.*</param>
+						</targetTests>
+						<mutators>
+							<mutator>DEFAULTS</mutator>
+						</mutators>
+						 <excludedTestClasses>
+    						<param>ast.projects.appbudget.**.*IT</param>
+    						<param>ast.projects.appbudget.**.*E2E</param>
+					    </excludedTestClasses>
+					    <!-- <mutationThreshold>0</mutationThreshold>-->
+					</configuration>
+					<executions>
+						<execution>
+							<phase>test</phase>
+							<goals>
+								<goal>mutationCoverage</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
