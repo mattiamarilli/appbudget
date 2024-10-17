@@ -170,12 +170,11 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbc_btnDelete.gridy = 2;
 		panel.add(btnDelete, gbc_btnDelete);
 		
-		listUsers.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				btnOpen.setEnabled(listUsers.getSelectedIndex() != -1);
-				btnDelete.setEnabled(listUsers.getSelectedIndex() != -1);
-			}
+		listUsers.addListSelectionListener(e -> {
+		    btnOpen.setEnabled(listUsers.getSelectedIndex() != -1);
+		    btnDelete.setEnabled(listUsers.getSelectedIndex() != -1);
 		});
+
 		
 		lblErrorMessage = new JLabel("");
 		lblErrorMessage.setName("errorMessageLabel");

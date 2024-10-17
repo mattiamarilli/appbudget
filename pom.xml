@@ -20,8 +20,8 @@
 		</sonar.issue.ignore.multicriteria.e11.ruleKey>
 		<sonar.issue.ignore.multicriteria.e11.resourceKey>
 			**/BudgetAppSwingViewIT*.java
-			**/BudgetSwingAppE2EIT*.java
-			**/UserSwingViewTest.java	
+			**/BudgetSwingAppE2E*.java
+			**/UserSwingViewTest*.java	
 		</sonar.issue.ignore.multicriteria.e11.resourceKey>
 		<sonar.coverage.exclusions>
 			**/model/*.*,

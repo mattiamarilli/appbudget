@@ -107,7 +107,7 @@ public class UserControllerIT {
 
         userController.deleteUser(userToDelete);
 
-        assertThat(userRepository.findAll().size()).isEqualTo(0);
+        assertThat(userRepository.findAll()).isEmpty();
         verify(view).refreshUsersList(argThat(users -> users.isEmpty()));
     }
 
