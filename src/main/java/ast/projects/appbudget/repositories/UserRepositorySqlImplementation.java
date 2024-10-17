@@ -60,9 +60,14 @@ public class UserRepositorySqlImplementation implements UserRepository {
 	public List<User> findAll() {
 	    session = getSessionFactory().openSession();
 	    List<User> users;
-        Query<User> query = session.createQuery("FROM User", User.class);
-        users = query.list();
-        session.close();
+	    try {
+	        Query<User> query = session.createQuery("FROM User", User.class);
+	        users = query.list();
+	    } catch (Exception e) {
+	    	throw e;
+	    } finally {
+	        session.close();
+	    }
 	    return users;
 	}
 }
