@@ -68,7 +68,6 @@ public class UserSwingViewTest extends AssertJSwingJUnitTestCase {
         GuiActionRunner.execute(() -> {
             budgetAppView = new BudgetAppSwingView();
             budgetAppView.setUserController(userController);
-            budgetAppView.maximizeWindow();
             return budgetAppView;
         });
         window = new FrameFixture(robot(), budgetAppView);
@@ -143,6 +142,7 @@ public class UserSwingViewTest extends AssertJSwingJUnitTestCase {
         window.label(ERROR_MESSAGE_LABEL).requireText(EMPTY_STRING);
     }
 
+    @GUITest
     @Test
     public void testAddButtonShouldDelegateToSchoolControllerNewStudent() {
         window.textBox(NAME_TEXT_BOX).enterText(INPUT_NAME);

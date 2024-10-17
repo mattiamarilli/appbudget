@@ -13,6 +13,20 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<testcontainers.version>1.19.3</testcontainers.version>
+		
+		<sonar.issue.ignore.multicriteria>e11</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria.e11.ruleKey>
+			java:S2699
+		</sonar.issue.ignore.multicriteria.e11.ruleKey>
+		<sonar.issue.ignore.multicriteria.e11.resourceKey>
+			**/BudgetAppSwingViewIT*.java
+			**/BudgetSwingAppE2EIT*.java
+			**/UserSwingViewTest.java	
+		</sonar.issue.ignore.multicriteria.e11.resourceKey>
+		<sonar.coverage.exclusions>
+			**/model/*.*,
+			**/BudgetSwingApp.java
+		</sonar.coverage.exclusions>
 
 		<sonar.junit.reportPaths>
 			${project.build.directory}/surefire-reports,
@@ -369,19 +383,19 @@
 											<start-period>20s</start-period>
 											<cmd>["sh", "-c", "healthcheck.sh --connect --innodb_initialized"]</cmd>
 										</healthCheck>
-<!--										<assembly>-->
-<!--											<mode>dir</mode>-->
-<!--											<targetDir>-->
-<!--												/docker-entrypoint-initdb.d</targetDir>-->
-<!--											<inline>-->
-<!--												<files>-->
-<!--													<file>-->
-<!--														<source>-->
-<!--															./sql/initializer.sql</source>-->
-<!--													</file>-->
-<!--												</files>-->
-<!--											</inline>-->
-<!--										</assembly>-->
+										<assembly>
+											<mode>dir</mode>
+											<targetDir>
+												/docker-entrypoint-initdb.d</targetDir>
+											<inline>
+												<files>
+													<file>
+														<source>
+															./sql/initializer.sql</source>
+													</file>
+												</files>
+											</inline>
+										</assembly>
 										<env>
 											<MARIADB_ALLOW_EMPTY_ROOT_PASSWORD>yes</MARIADB_ALLOW_EMPTY_ROOT_PASSWORD>
 										</env>

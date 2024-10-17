@@ -78,7 +78,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
             budgetAppView = new BudgetAppSwingView();
             userController = new UserController(budgetAppView, userRepository);
             budgetAppView.setUserController(userController);
-            budgetAppView.maximizeWindow();
             return budgetAppView;
         });
 

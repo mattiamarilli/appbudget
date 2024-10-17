@@ -24,8 +24,6 @@ public class User {
     public User() {}
 
     public User(String name, String surname) {
-        //validateName(name);
-        //validateSurname(surname);
         this.name = name;
         this.surname = surname;
     }
@@ -49,7 +47,6 @@ public class User {
     }
 
     public void setName(String name) {
-        //validateName(name);
         this.name = name;
     }
 
@@ -58,21 +55,8 @@ public class User {
     }
 
     public void setSurname(String surname) {
-        //validateSurname(surname);
         this.surname = surname;
     }
-
-	/*
-	 * private void validateName(String name) { if (name == null) { throw new
-	 * IllegalArgumentException("Name or surname cannot be null"); } if
-	 * (name.trim().isEmpty()) { throw new
-	 * IllegalArgumentException("Name or surname cannot be empty"); } }
-	 * 
-	 * private void validateSurname(String surname) { if (surname == null) { throw
-	 * new IllegalArgumentException("Name or surname cannot be null"); } if
-	 * (surname.trim().isEmpty()) { throw new
-	 * IllegalArgumentException("Name or surname cannot be empty"); } }
-	 */
     
     @Override
     public String toString() {

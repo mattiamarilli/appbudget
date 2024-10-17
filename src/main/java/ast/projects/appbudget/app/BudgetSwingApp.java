@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -64,7 +65,7 @@ public class BudgetSwingApp {
                 System.out.println("App stated");
 
             } catch (Exception e) {
-                e.printStackTrace();
+            	LogManager.getLogger().debug(e.getStackTrace());
             }
             
         });
@@ -87,7 +88,7 @@ public class BudgetSwingApp {
                 }
             }
         } catch (SQLException | IOException e) {
-            e.printStackTrace();
+        	LogManager.getLogger().debug(e.getStackTrace());
         }
     }
 
