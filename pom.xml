@@ -21,7 +21,7 @@
 		<sonar.issue.ignore.multicriteria.e11.resourceKey>
 			**/BudgetAppSwingViewIT*.java
 			**/BudgetSwingAppE2E*.java
-			**/UserSwingViewTest*.java	
+			**/UserSwingViewTest.java	
 		</sonar.issue.ignore.multicriteria.e11.resourceKey>
 		
 		<!-- Disable rule for: Rename class "BudgetSwingAppE2E" to match the regular expression: '^((Test|IT)[a-zA-Z0-9_]+|[A-Z][a-zA-Z0-9_]*(Test|Tests|TestCase|IT|ITCase))$'-->

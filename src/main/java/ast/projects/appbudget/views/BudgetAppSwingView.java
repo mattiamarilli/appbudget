@@ -89,13 +89,13 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		panel.add(txtName, gbcTxtName);
 		txtName.setColumns(10);
 		
-		JLabel lblNewLabel_1 = new JLabel("Surname");
+		JLabel lblNewLabel1 = new JLabel("Surname");
 		GridBagConstraints gbcLblNewLabel1 = new GridBagConstraints();
 		gbcLblNewLabel1.fill = GridBagConstraints.HORIZONTAL;
 		gbcLblNewLabel1.insets = new Insets(0, 0, 5, 5);
 		gbcLblNewLabel1.gridx = 2;
 		gbcLblNewLabel1.gridy = 0;
-		panel.add(lblNewLabel_1, gbcLblNewLabel1);
+		panel.add(lblNewLabel1, gbcLblNewLabel1);
 		
 		txtSurname = new JTextField();
 		txtSurname.setName("surnameTextBox");
@@ -159,7 +159,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		btnDelete.setName("deleteUserButton");
 		btnDelete.setEnabled(false);
 		btnDelete.addActionListener(
-				   e -> userController.deleteUser((User) listUsers.getSelectedValue())
+				   e -> userController.deleteUser(listUsers.getSelectedValue())
 				);
 		GridBagConstraints gbcBtnDelete = new GridBagConstraints();
 		gbcBtnDelete.anchor = GridBagConstraints.NORTHWEST;
