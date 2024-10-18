@@ -114,6 +114,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
         window.list().selectItem(0);
         window.button(JButtonMatcher.withText(BUTTON_DELETE_USER_TEXT)).click();
         
-        assertThat(userRepository.findAll()).isEmpty();;
+        assertThat(userRepository.findAll()).isEmpty();
     }
 }

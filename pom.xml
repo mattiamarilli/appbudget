@@ -24,7 +24,7 @@
 			**/UserSwingViewTest*.java	
 		</sonar.issue.ignore.multicriteria.e11.resourceKey>
 		<sonar.coverage.exclusions>
-			**/model/*.*,
+			**/models/*.*,
 			**/BudgetSwingApp.java
 		</sonar.coverage.exclusions>
 
@@ -32,6 +32,9 @@
 			${project.build.directory}/surefire-reports,
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
+		
+		<!-- Forza il Sonar Scanner a ignorare la cache -->
+    	<sonar.scanner.force>true</sonar.scanner.force>
 	</properties>
 
 	<dependencies>

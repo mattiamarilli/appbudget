@@ -18,8 +18,6 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
