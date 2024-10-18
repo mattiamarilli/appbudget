@@ -62,7 +62,7 @@ public class BudgetSwingApp {
 
                 view.setUserController(userController);
                 view.setVisible(true);
-                System.out.println("App stated");
+                LogManager.getLogger().info("App stated");
 
             } catch (Exception e) {
             	LogManager.getLogger().debug(e.getStackTrace());
