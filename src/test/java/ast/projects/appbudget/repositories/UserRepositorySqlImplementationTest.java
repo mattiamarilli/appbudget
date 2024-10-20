@@ -147,7 +147,7 @@ public class UserRepositorySqlImplementationTest {
 		Session session = userRepository.getSession();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
         assertThat(session.isOpen()).isFalse();
-		assertThat(getUsersFromDatabaseManually().size()).isEqualTo(1);
+		assertThat(getUsersFromDatabaseManually()).hasSize(1);
 	}
 
     @Test
@@ -160,7 +160,7 @@ public class UserRepositorySqlImplementationTest {
 		
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
         assertThat(session.isOpen()).isFalse();
-        assertThat(users).isEmpty();;
+        assertThat(users).isEmpty();
 	}
 
 	@Test

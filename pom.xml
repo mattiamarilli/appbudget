@@ -14,17 +14,26 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<testcontainers.version>1.19.3</testcontainers.version>
 		
-		<sonar.issue.ignore.multicriteria>e11</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e11,e12</sonar.issue.ignore.multicriteria>
 		<sonar.issue.ignore.multicriteria.e11.ruleKey>
 			java:S2699
 		</sonar.issue.ignore.multicriteria.e11.ruleKey>
 		<sonar.issue.ignore.multicriteria.e11.resourceKey>
 			**/BudgetAppSwingViewIT*.java
-			**/BudgetSwingAppE2EIT*.java
+			**/BudgetSwingAppE2E*.java
 			**/UserSwingViewTest.java	
 		</sonar.issue.ignore.multicriteria.e11.resourceKey>
+		
+		<!-- Disable rule for: Rename class "BudgetSwingAppE2E" to match the regular expression: '^((Test|IT)[a-zA-Z0-9_]+|[A-Z][a-zA-Z0-9_]*(Test|Tests|TestCase|IT|ITCase))$'-->
+		<sonar.issue.ignore.multicriteria.e12.ruleKey>
+			java:S3577
+		</sonar.issue.ignore.multicriteria.e12.ruleKey>
+		<sonar.issue.ignore.multicriteria.e12.resourceKey>
+			**/BudgetSwingAppE2E.java
+		</sonar.issue.ignore.multicriteria.e12.resourceKey>
+		
 		<sonar.coverage.exclusions>
-			**/model/*.*,
+			**/models/*.*,
 			**/BudgetSwingApp.java
 		</sonar.coverage.exclusions>
 
@@ -32,6 +41,9 @@
 			${project.build.directory}/surefire-reports,
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
+		
+		<!-- Forza il Sonar Scanner a ignorare la cache -->
+    	<sonar.scanner.force>true</sonar.scanner.force>
 	</properties>
 
 	<dependencies>
@@ -243,7 +255,7 @@
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
-					<version>3.8.0.2131</version>
+					<version>3.7.0.1891</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eluder.coveralls</groupId>
