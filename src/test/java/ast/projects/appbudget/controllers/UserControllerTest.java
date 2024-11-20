@@ -49,23 +49,18 @@ public class UserControllerTest {
     public void testAddUserSuccess() {
         User user = new User(TEST_USER_NAME, TEST_USER_SURNAME);
         when(userRepository.findAll()).thenReturn(Arrays.asList(user));
-        userController.addUser(TEST_USER_NAME, TEST_USER_SURNAME);
+        userController.addUser(user);
 
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-
-        assertEquals(TEST_USER_NAME, userCaptor.getValue().getName());
-        assertEquals(TEST_USER_SURNAME, userCaptor.getValue().getSurname());
-
+        verify(userRepository).save(user);
         verify(budgetAppView).refreshUsersList(userRepository.findAll());
-        verify(budgetAppView).resetErrorMessage();
+        verify(budgetAppView).resetUserErrorMessage();
     }
 
     @Test
     public void testAddUserFailure() {
         doThrow(new RuntimeException()).when(userRepository).save(any(User.class));
-        userController.addUser(TEST_USER_NAME, TEST_USER_SURNAME);
-        verify(budgetAppView).showErrorMessage(ERROR_MESSAGE_SAVE_FAILED);
+        userController.addUser(new User(TEST_USER_NAME, TEST_USER_SURNAME));
+        verify(budgetAppView).showUserErrorMessage(ERROR_MESSAGE_SAVE_FAILED);
     }
 
     @Test
@@ -74,14 +69,14 @@ public class UserControllerTest {
         when(userRepository.findAll()).thenReturn(users);
         userController.allUsers();
         verify(budgetAppView).refreshUsersList(users);
-        verify(budgetAppView).resetErrorMessage();
+        verify(budgetAppView).resetUserErrorMessage();
     }
     
     @Test
     public void testAllUserFailure() {
         doThrow(new RuntimeException()).when(userRepository).findAll();
         userController.allUsers();
-        verify(budgetAppView).showErrorMessage(ERROR_MESSAGE_FETCH_FAILED);
+        verify(budgetAppView).showUserErrorMessage(ERROR_MESSAGE_FETCH_FAILED);
     }
     
     @Test
@@ -91,7 +86,7 @@ public class UserControllerTest {
         userController.deleteUser(user);
         verify(userRepository).delete(user);
         verify(budgetAppView).refreshUsersList(userRepository.findAll());
-        verify(budgetAppView).resetErrorMessage();
+        verify(budgetAppView).resetUserErrorMessage();
     }
     
     @Test
@@ -99,7 +94,7 @@ public class UserControllerTest {
         User user = new User(TEST_USER_NAME, TEST_USER_SURNAME);
         doThrow(new RuntimeException()).when(userRepository).delete(any(User.class));
         userController.deleteUser(user);
-        verify(budgetAppView).showErrorMessage(ERROR_MESSAGE_DELETE_FAILED);
+        verify(budgetAppView).showUserErrorMessage(ERROR_MESSAGE_DELETE_FAILED);
     }
 }
 

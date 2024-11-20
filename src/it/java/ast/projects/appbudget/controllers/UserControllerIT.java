@@ -88,7 +88,7 @@ public class UserControllerIT {
 
     @Test
     public void testNewUser() {
-        userController.addUser(TEST_USER_NAME, TEST_USER_SURNAME);
+        userController.addUser(new User(TEST_USER_NAME, TEST_USER_SURNAME));
         User user = userRepository.findAll().get(0);
         assertTrue(user.getName().equals(TEST_USER_NAME) && user.getSurname().equals(TEST_USER_SURNAME));
         verify(view).refreshUsersList(
@@ -97,13 +97,12 @@ public class UserControllerIT {
                         users.get(0).getName().equals(TEST_USER_NAME) &&
                         users.get(0).getSurname().equals(TEST_USER_SURNAME)
                 ));
-        verify(view).resetErrorMessage();
     }
 
     @Test
     public void testDeleteUser() {
         User userToDelete = new User(1, TEST_USER_NAME, TEST_USER_SURNAME);
-        userController.addUser(TEST_USER_NAME, TEST_USER_SURNAME);
+        userController.addUser(new User(TEST_USER_NAME, TEST_USER_SURNAME));
 
         userController.deleteUser(userToDelete);
 

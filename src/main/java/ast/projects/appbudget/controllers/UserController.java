@@ -17,21 +17,21 @@ public class UserController {
 	public void allUsers() {
 		try {
 			userView.refreshUsersList(userRepository.findAll());
-			userView.resetErrorMessage();
+			userView.resetUserErrorMessage();
 		}
 		catch(Exception e) {
-			userView.showErrorMessage("Error fetching users");
+			userView.showUserErrorMessage("Error fetching users");
 		}
 		
 	}
 
-	public synchronized void addUser(String name, String surname) {
+	public void addUser(User user) {
 		try {
-			userRepository.save(new User(name, surname));
+			userRepository.save(user);
 			userView.refreshUsersList(userRepository.findAll());
-			userView.resetErrorMessage();
+			userView.resetUserErrorMessage();
 		} catch (Exception e) {
-			userView.showErrorMessage("Error adding new user");
+			userView.showUserErrorMessage("Error adding new user");
 		}
 	}
 
@@ -39,9 +39,9 @@ public class UserController {
 		try {
 			userRepository.delete(user);
 			userView.refreshUsersList(userRepository.findAll());
-			userView.resetErrorMessage();
+			userView.resetUserErrorMessage();
 		}catch (Exception e) {
-			userView.showErrorMessage("Error deleting user");
+			userView.showUserErrorMessage("Error deleting user");
 		}
 		
 	}

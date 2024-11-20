@@ -1,10 +1,14 @@
 package ast.projects.appbudget.models;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -20,14 +24,18 @@ public class User {
     
     @Column(name = "surname", nullable = false, unique = true)
     private String surname;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Budget> budgets;
 
-    public User() {}
+	public User() {}
 
     public User(String name, String surname) {
         this.name = name;
         this.surname = surname;
     }
     
+    //TODO: try to remove
     public User(long id, String name, String surname) {
         this.id = id;
         this.name = name;
@@ -62,4 +70,14 @@ public class User {
     public String toString() {
         return name + " " + surname;
     }
+    
+    public List<Budget> getBudgets() {
+		return budgets;
+	}
+
+	public void setBudgets(List<Budget> budgets) {
+		this.budgets = budgets;
+	}
+	
+	
 }

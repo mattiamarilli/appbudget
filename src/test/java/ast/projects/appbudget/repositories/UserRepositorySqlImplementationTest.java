@@ -1,5 +1,7 @@
 package ast.projects.appbudget.repositories;
 
+import ast.projects.appbudget.models.Budget;
+import ast.projects.appbudget.models.ExpenseItem;
 import ast.projects.appbudget.models.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -53,7 +55,9 @@ public class UserRepositorySqlImplementationTest {
                 .setProperty("hibernate.connection.username", HIBERNATE_CONNECTION_USERNAME)
                 .setProperty("hibernate.connection.password", HIBERNATE_CONNECTION_PASSWORD)
                 .setProperty("hibernate.connection.autocommit", HIBERNATE_CONNECTION_AUTOCOMMIT)
-                .addAnnotatedClass(User.class)
+				.addAnnotatedClass(User.class)
+				.addAnnotatedClass(Budget.class)
+				.addAnnotatedClass(ExpenseItem.class)
                 .buildSessionFactory();
 
         userRepository = new UserRepositorySqlImplementation(sessionFactory);
