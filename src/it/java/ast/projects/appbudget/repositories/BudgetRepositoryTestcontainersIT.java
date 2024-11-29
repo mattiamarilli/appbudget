@@ -18,7 +18,7 @@ import ast.projects.appbudget.models.Budget;
 import ast.projects.appbudget.models.ExpenseItem;
 import ast.projects.appbudget.models.User;
 
-public class UserRepositoryTestcontainersIT {
+public class BudgetRepositoryTestcontainersIT {
 
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.5.5"));
 
@@ -26,7 +26,7 @@ public class UserRepositoryTestcontainersIT {
     public static final MariaDBContainer<?> mariaDB = MARIA_DB_CONTAINER.withUsername("root").withPassword("")
             .withInitScript("initializer.sql");
 
-    private static UserRepositorySqlImplementation userRepository;
+    private static BudgetRepositorySqlImplementation budgetRepository;
     private static SessionFactory factory;
 
     @Before
@@ -46,7 +46,7 @@ public class UserRepositoryTestcontainersIT {
                 .addAnnotatedClass(ExpenseItem.class)
                 .buildSessionFactory();
 
-        userRepository = new UserRepositorySqlImplementation(factory);
+        budgetRepository = new BudgetRepositorySqlImplementation(factory);
     }
 
     @After
@@ -61,42 +61,42 @@ public class UserRepositoryTestcontainersIT {
 
     @Test
     public void testFindAll() {
-        User u1 = addTestUserToDatabase("Mario", "Rossi");
-        User u2 = addTestUserToDatabase("Luigi", "Verdi");
+        Budget b1 = addTestBudgetToDatabase("testtitle1", 2000);
+        Budget b2 = addTestBudgetToDatabase("testtitle2", 1000);
 
-        List<User> users = userRepository.findAll();
+        List<Budget> budgets = budgetRepository.findAll();
 
-        assertThat(users).hasSize(2);
-        assertThat(users.get(0).getName()).isEqualTo(u1.getName());
-        assertThat(users.get(0).getSurname()).isEqualTo(u1.getSurname());
-        assertThat(users.get(1).getName()).isEqualTo(u2.getName());
-        assertThat(users.get(1).getSurname()).isEqualTo(u2.getSurname());
+        assertThat(budgets).hasSize(2);
+        assertThat(budgets.get(0).getTitle()).isEqualTo(b1.getTitle());
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(b1.getIncomes());
+        assertThat(budgets.get(1).getTitle()).isEqualTo(b2.getTitle());
+        assertThat(budgets.get(1).getIncomes()).isEqualTo(b2.getIncomes());
     }
 
     @Test
-    public void testSaveUser() {
-        User u1 = addTestUserToDatabase("Mario", "Rossi");
+    public void testSaveBudget() {
+        Budget b1 = addTestBudgetToDatabase("testtitle1", 2000);
 
-        List<User> users = userRepository.findAll();
+        List<Budget> budgets = budgetRepository.findAll();
 
-        assertThat(users).hasSize(1);
-        assertThat(users.get(0).getName()).isEqualTo(u1.getName());
-        assertThat(users.get(0).getSurname()).isEqualTo(u1.getSurname());
+        assertThat(budgets).hasSize(1);
+        assertThat(budgets.get(0).getTitle()).isEqualTo(b1.getTitle());
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(b1.getIncomes());
     }
 
     @Test
-    public void testDeleteUser() {
-        User user = addTestUserToDatabase("Mario", "Rossi");
+    public void testDeleteBudget() {
+    	Budget b1 = addTestBudgetToDatabase("testtitle1", 2000);
 
-        userRepository.delete(user);
+        budgetRepository.delete(b1);
 
-        List<User> users = userRepository.findAll();
-        assertThat(users).isEmpty();
+        List<Budget> budgets = budgetRepository.findAll();
+        assertThat(budgets).isEmpty();
     }
 
-    private User addTestUserToDatabase(String name, String surname) {
-        User user = new User(name, surname);
-        userRepository.save(user);
-        return user;
+    private Budget addTestBudgetToDatabase(String title, double amount) {
+        Budget budget = new Budget(title, amount);
+        budgetRepository.save(budget);
+        return budget;
     }
 }

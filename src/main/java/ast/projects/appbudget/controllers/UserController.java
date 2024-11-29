@@ -7,41 +7,42 @@ import ast.projects.appbudget.views.BudgetAppView;
 public class UserController {
 
 	private UserRepository userRepository;
-	private BudgetAppView userView;
+	private BudgetAppView budgetAppView;
 
 	public UserController(BudgetAppView userView, UserRepository userRepository) {
-		this.userView = userView;
+		this.budgetAppView = userView;
 		this.userRepository = userRepository;
 	}
 
 	public void allUsers() {
 		try {
-			userView.refreshUsersList(userRepository.findAll());
-			userView.resetErrorMessage();
+			budgetAppView.refreshUsersList(userRepository.findAll());
+			budgetAppView.resetUserErrorMessage();
 		}
 		catch(Exception e) {
-			userView.showErrorMessage("Error fetching users");
+			budgetAppView.showUserErrorMessage("Error fetching users");
 		}
 		
 	}
 
-	public synchronized void addUser(String name, String surname) {
+	
+	public void addUser(User user) {
 		try {
-			userRepository.save(new User(name, surname));
-			userView.refreshUsersList(userRepository.findAll());
-			userView.resetErrorMessage();
+			userRepository.save(user);
+			budgetAppView.refreshUsersList(userRepository.findAll());
+			budgetAppView.resetUserErrorMessage();
 		} catch (Exception e) {
-			userView.showErrorMessage("Error adding new user");
+			budgetAppView.showUserErrorMessage("Error adding new user");
 		}
 	}
 
 	public void deleteUser(User user) {
 		try {
 			userRepository.delete(user);
-			userView.refreshUsersList(userRepository.findAll());
-			userView.resetErrorMessage();
+			budgetAppView.refreshUsersList(userRepository.findAll());
+			budgetAppView.resetUserErrorMessage();
 		}catch (Exception e) {
-			userView.showErrorMessage("Error deleting user");
+			budgetAppView.showUserErrorMessage("Error deleting user");
 		}
 		
 	}

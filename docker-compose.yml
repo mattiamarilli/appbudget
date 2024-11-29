@@ -1,4 +1,3 @@
-version: '2.0'
 services:
   mariadb:
     container_name: appbudget-mdb
@@ -13,7 +12,6 @@ services:
       - "3306:3306"
     expose:
       - 3306
-
   adminer:
     container_name: appbudget-adm
     image: adminer
@@ -21,13 +19,7 @@ services:
     ports:
       - 8080:8080
 
-  app:
-    image: appbudget
-    build:
-      context: .
-      dockerfile: Dockerfile
-    depends_on:
-      - mariadb
-
 volumes:
   database-data:
+
+ 

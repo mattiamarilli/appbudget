@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.hibernate.SessionFactory;
@@ -20,25 +19,13 @@ import org.mockito.MockitoAnnotations;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import ast.projects.appbudget.models.Budget;
+import ast.projects.appbudget.models.ExpenseItem;
 import ast.projects.appbudget.models.User;
 import ast.projects.appbudget.repositories.UserRepositorySqlImplementation;
 import ast.projects.appbudget.views.BudgetAppView;
 
 public class UserControllerRaceConditionIT {
-
-	private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.5.5"));
-	private static final String JDBC_PREFIX = "jdbc:";
-	private static final String DB_URL_FORMAT = "jdbc:mariadb://%s:%d/appbudget";
-	private static final String DB_USERNAME = "testuser";
-	private static final String DB_PASSWORD = "testpassword";
-	private static final String HIBERNATE_DIALECT = "org.hibernate.dialect.MariaDBDialect";
-	private static final String HIBERNATE_HBM2DDL_AUTO = "create-drop";
-	private static final String HIBERNATE_SHOW_SQL = "true";
-	private static final String INIT_SCRIPT = "initializer.sql";
-
-	private static final String TEST_USER_NAME = "test1name";
-	private static final String TEST_USER_SURNAME = "test1surname";
-	private static final int THREAD_COUNT = 10;
 
 	private UserRepositorySqlImplementation userRepository;
 	
@@ -51,24 +38,30 @@ public class UserControllerRaceConditionIT {
 	private AutoCloseable closeable;
 	private static SessionFactory factory;
 	
+	private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(
+			DockerImageName.parse("mariadb:10.5.5"));
+	
 	@ClassRule
 	public static final MariaDBContainer<?> mariaDB = MARIA_DB_CONTAINER.withUsername("root").withPassword("")
-			.withInitScript(INIT_SCRIPT);
+			.withInitScript("initializer.sql");
 
 	@Before
 	public void setup() {
 		closeable = MockitoAnnotations.openMocks(this);
 		mariaDB.start();
 		String jdbcUrl = mariaDB.getJdbcUrl();
-		URI uri = URI.create(jdbcUrl.replace(JDBC_PREFIX, ""));
+		URI uri = URI.create(jdbcUrl.replace("jdbc:", ""));
 		factory = new Configuration()
-				.setProperty("hibernate.dialect", HIBERNATE_DIALECT)
-				.setProperty("hibernate.connection.url", String.format(DB_URL_FORMAT, uri.getHost(), uri.getPort()))
-				.setProperty("hibernate.connection.username", DB_USERNAME)
-				.setProperty("hibernate.connection.password", DB_PASSWORD)
-				.setProperty("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO)
-				.setProperty("hibernate.show_sql", HIBERNATE_SHOW_SQL)
+				.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect")
+				.setProperty("hibernate.connection.url", String.format("jdbc:mariadb://%s:%d/appbudget", uri.getHost(), uri.getPort()))
+				.setProperty("hibernate.connection.username", "testuser")
+				.setProperty("hibernate.connection.password", "testpassword")
+				.setProperty("hibernate.hbm2ddl.auto", "create-drop")
+				.setProperty("hibernate.show_sql", "true")
+				.setProperty("hibernate.hikari.maximumPoolSize", "10")
 				.addAnnotatedClass(User.class)
+				.addAnnotatedClass(Budget.class)
+				.addAnnotatedClass(ExpenseItem.class)
 				.buildSessionFactory();
 
 		userRepository = new UserRepositorySqlImplementation(factory);
@@ -87,25 +80,22 @@ public class UserControllerRaceConditionIT {
 	
 	@Test
 	public void testNewUser() throws InterruptedException {
-		CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
+		CountDownLatch latch = new CountDownLatch(10);
 
-		// Use a single UserController instance
-		UserController sharedUserController = new UserController(view, userRepository);
-
-		IntStream.range(0, THREAD_COUNT)
+		IntStream.range(0, 10)
 			.mapToObj(i -> new Thread(() -> {
-				sharedUserController.addUser(TEST_USER_NAME, TEST_USER_SURNAME);  // Use the shared instance
+				
+				User user = new User("Mario", "Rossi");
+			
+				new UserController(view, userRepository).addUser(user); 
 				latch.countDown();
 			}))
 			.forEach(Thread::start);
 
-		// Wait for all the threads to finish
-		latch.await(10, TimeUnit.SECONDS);
-
-		// There should be a single element in the list
+		latch.await();
 		List<User> userFound = userRepository.findAll();
-		assertEquals(1, userFound.size());  // Expect only 1 user
-		User u = userFound.get(0);
-		assertTrue(u.getName().equals(TEST_USER_NAME) && u.getSurname().equals(TEST_USER_SURNAME));
+		assertEquals(1, userFound.size());
+		assertEquals(userFound.get(0).getName(), "Mario");
+		assertEquals(userFound.get(0).getSurname(), "Rossi");
 	}
 }

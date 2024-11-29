@@ -3,6 +3,7 @@ package ast.projects.appbudget.views;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 import org.assertj.swing.core.matcher.JButtonMatcher;
@@ -18,68 +19,68 @@ import org.junit.runner.RunWith;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import ast.projects.appbudget.controllers.BudgetController;
+import ast.projects.appbudget.controllers.ExpenseItemController;
 import ast.projects.appbudget.controllers.UserController;
+import ast.projects.appbudget.models.Budget;
+import ast.projects.appbudget.models.ExpenseItem;
+import ast.projects.appbudget.models.Type;
 import ast.projects.appbudget.models.User;
+import ast.projects.appbudget.repositories.BudgetRepositorySqlImplementation;
+import ast.projects.appbudget.repositories.ExpenseItemRepositorySqlImplementation;
 import ast.projects.appbudget.repositories.UserRepositorySqlImplementation;
 
 @RunWith(GUITestRunner.class)
 public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(
             DockerImageName.parse("mariadb:10.5.5"));
+    
+    @ClassRule
+    public static final MariaDBContainer<?> mariaDB = MARIA_DB_CONTAINER.withUsername("root").withPassword("")
+            .withInitScript("initializer.sql");
 
     private UserRepositorySqlImplementation userRepository;
+	private BudgetRepositorySqlImplementation budgetRepository;
+	private ExpenseItemRepositorySqlImplementation expenseItemRepository;
+	
     private BudgetAppSwingView budgetAppView;
     private UserController userController;
+	private BudgetController budgetController;
+	private ExpenseItemController expenseItemController;
     private FrameFixture window;
 
     private static SessionFactory factory;
-
-    // Constants for database configuration and Hibernate
-    private static final String JDBC_PREFIX = "jdbc:";
-    private static final String JDBC_URL_FORMAT = "jdbc:mariadb://%s:%s/appbudget";
-    private static final String HIBERNATE_DIALECT = "org.hibernate.dialect.MariaDBDialect";
-    private static final String HIBERNATE_USERNAME = "testuser";
-    private static final String HIBERNATE_PASSWORD = "testpassword";
-    private static final String HIBERNATE_HBM2DDL_AUTO = "create-drop";
-    private static final String HIBERNATE_SHOW_SQL = "true";
-    private static final String INIT_SCRIPT = "initializer.sql";
-
-    // Constants for test values
-    private static final String BUTTON_ADD_TEXT = "Add";
-    private static final String BUTTON_DELETE_USER_TEXT = "Delete User";
-    private static final String TEXTBOX_NAME = "nameTextBox";
-    private static final String TEXTBOX_SURNAME = "surnameTextBox";
-
-    // Test user constants
-    private static final String TEST_USER_NAME = "test1name";
-    private static final String TEST_USER_SURNAME = "test1surname";
-
-    @ClassRule
-    public static final MariaDBContainer<?> mariaDB = MARIA_DB_CONTAINER.withUsername("root").withPassword("")
-            .withInitScript(INIT_SCRIPT);
 
     @Override
     protected void onSetUp() throws Exception {
         mariaDB.start();
         String jdbcUrl = mariaDB.getJdbcUrl();
-        URI uri = URI.create(jdbcUrl.replace(JDBC_PREFIX, ""));
+        URI uri = URI.create(jdbcUrl.replace("jdbc:", ""));
         factory = new Configuration()
-                .setProperty("hibernate.dialect", HIBERNATE_DIALECT)
-                .setProperty("hibernate.connection.url", String.format(JDBC_URL_FORMAT, uri.getHost(), uri.getPort()))
-                .setProperty("hibernate.connection.username", HIBERNATE_USERNAME)
-                .setProperty("hibernate.connection.password", HIBERNATE_PASSWORD)
-                .setProperty("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO)
-                .setProperty("hibernate.show_sql", HIBERNATE_SHOW_SQL)
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect")
+                .setProperty("hibernate.connection.url", String.format("jdbc:mariadb://%s:%s/appbudget", uri.getHost(), uri.getPort()))
+                .setProperty("hibernate.connection.username", "testuser")
+                .setProperty("hibernate.connection.password", "testpassword")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .setProperty("hibernate.show_sql","true")
                 .addAnnotatedClass(User.class)
+				.addAnnotatedClass(Budget.class)
+				.addAnnotatedClass(ExpenseItem.class)
                 .buildSessionFactory();
         userRepository = new UserRepositorySqlImplementation(factory);
+		budgetRepository = new BudgetRepositorySqlImplementation(factory);
+		expenseItemRepository = new ExpenseItemRepositorySqlImplementation(factory);
 
         GuiActionRunner.execute(() -> {
-            budgetAppView = new BudgetAppSwingView();
-            userController = new UserController(budgetAppView, userRepository);
-            budgetAppView.setUserController(userController);
-            return budgetAppView;
-        });
+			budgetAppView = new BudgetAppSwingView();
+			userController = new UserController(budgetAppView, userRepository);
+			budgetController = new BudgetController (budgetAppView,budgetRepository);
+			expenseItemController = new ExpenseItemController(budgetAppView,expenseItemRepository);
+			budgetAppView.setUserController(userController);
+			budgetAppView.setBudgetController(budgetController);
+			budgetAppView.setExpenseItemController(expenseItemController);
+			return budgetAppView;
+		});
 
         window = new FrameFixture(robot(), budgetAppView);
         window.show();
@@ -97,23 +98,197 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 
     @Test
     public void testAddUser() {
-        window.textBox(TEXTBOX_NAME).enterText(TEST_USER_NAME);
-        window.textBox(TEXTBOX_SURNAME).enterText(TEST_USER_SURNAME);
-        window.button(JButtonMatcher.withText(BUTTON_ADD_TEXT)).click();
+        window.textBox("textFieldUserName").enterText("testname");
+        window.textBox("textFieldUserSurname").enterText("testsurname");
+        window.button(JButtonMatcher.withText("Add")).click();
 
         List<User> users = userRepository.findAll();
         assertThat(users.size()).isOne();
-        assertThat(users.get(0).getName()).isEqualTo(TEST_USER_NAME);
-        assertThat(users.get(0).getSurname()).isEqualTo(TEST_USER_SURNAME);
+        assertThat(users.get(0).getName()).isEqualTo("testname");
+        assertThat(users.get(0).getSurname()).isEqualTo("testsurname");
+    }
+    
+    @Test
+    public void testAddBudget() {
+    	
+    	User user = new User(1, "testname", "testsurname");
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.textBox("textFieldBudgetTitle").enterText("testtitle2");
+		window.textBox("textFieldBudgetIncomes").enterText("2000");
+		window.button(JButtonMatcher.withText("Add Budget")).click();
+		
+		List<Budget> budgets = budgetRepository.findAll();
+		assertThat(budgets.size()).isOne();
+		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
+        assertThat(budgets.get(0).getIncomes() == 2000);
+        assertThat(budgets.get(0).getUser().getId() == 1);
+    	
+    }
+    
+    @Test
+    public void testAddExpense() {
+    	
+    	User user = new User(1, "testname", "testsurname");
+		Budget budget = new Budget("testtitle", 1000);
+		
+		user.setBudgets(Arrays.asList(budget));
+		budget.setUser(user);
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		
+		window.textBox("textFieldExpenseItemTitle").enterText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").enterText("10");
+		window.comboBox("comboBoxExpenseItemType").selectItem(0);
+		window.button(JButtonMatcher.withText("Add Expense")).click();
+		
+		List<ExpenseItem> expenseItems = expenseItemRepository.findAll();
+		
+		assertThat(expenseItems.size()).isOne();
+		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitle");
+        assertThat(expenseItems.get(0).getAmount() == 10);
+        assertThat(expenseItems.get(0).getType() == Type.NEEDS);
+        assertThat(expenseItems.get(0).getBudget().getId() == 1);
+    	
+    }
+    
+    
+    @Test
+    public void testModifyBudget() {
+    	User user = new User(1, "testname", "testsurname");
+		Budget budget = new Budget("testtitle", 1000);
+		budget.setUser(user);
+		user.setBudgets(Arrays.asList(budget));
+		
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		window.textBox("textFieldBudgetTitle").enterText("testtitle2");
+		window.textBox("textFieldBudgetIncomes").enterText("2000");
+
+		window.button(JButtonMatcher.withText("Modify Budget")).click();
+		
+		List<Budget> budgets = budgetRepository.findAll();
+		assertThat(budgets.size()).isOne();
+		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
+        assertThat(budgets.get(0).getIncomes() == 2000);
+        assertThat(budgets.get(0).getUser().getId() == 1);
+    }
+    
+    @Test
+    public void testModifyExpense() {
+    	
+    	User user = new User(1, "testname", "testsurname");
+		Budget budget = new Budget("testtitle", 1000);
+		ExpenseItem expense = new ExpenseItem("testtitle1", Type.NEEDS,10);
+
+		user.setBudgets(Arrays.asList(budget));
+		budget.setUser(user);
+		budget.setExpenseItems(Arrays.asList(expense));
+		expense.setBudget(budget);
+
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		
+		window.list("listNeeds").selectItem(0);
+		window.textBox("textFieldExpenseItemTitle").enterText("testtitlemod");
+		window.textBox("textFieldExpenseItemAmount").enterText("100");
+		window.comboBox("comboBoxExpenseItemType").selectItem(1);
+		window.button(JButtonMatcher.withText("Modify Expense")).click();
+		
+		List<ExpenseItem> expenseItems = expenseItemRepository.findAll();
+		
+		assertThat(expenseItems.size()).isOne();
+		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitlemod");
+        assertThat(expenseItems.get(0).getAmount() == 100);
+        assertThat(expenseItems.get(0).getType() == Type.WANTS);
+        assertThat(expenseItems.get(0).getBudget().getId() == 1);
+    	
     }
 
     @Test
     public void testDeleteUser() {
-        userRepository.save(new User(TEST_USER_NAME, TEST_USER_SURNAME));
+        userRepository.save(new User("testname", "testsurname"));
         GuiActionRunner.execute(() -> userController.allUsers());
         window.list().selectItem(0);
-        window.button(JButtonMatcher.withText(BUTTON_DELETE_USER_TEXT)).click();
+        window.button(JButtonMatcher.withText("Delete User")).click();
         
         assertThat(userRepository.findAll()).isEmpty();
     }
+    
+    
+    @Test
+    public void testDeleteBudget() {
+    	
+    	User user = new User(1, "testname", "testsurname");
+		Budget budget = new Budget("testtitle", 1000);
+		budget.setUser(user);
+		user.setBudgets(Arrays.asList(budget));
+		
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		
+		window.list("listBudgets").selectItem(0);
+		window.button(JButtonMatcher.withText("Delete Budget")).click();
+		
+		assertThat(budgetRepository.findAll()).isEmpty();
+    	
+    }
+   
+    @Test
+    public void testDeleteExpense() {
+    	
+    	User user = new User(1, "testname", "testsurname");
+		Budget budget = new Budget("testtitle", 1000);
+		ExpenseItem expense = new ExpenseItem("testtitle", Type.NEEDS,10);
+		
+		user.setBudgets(Arrays.asList(budget));
+		budget.setUser(user);
+		budget.setExpenseItems(Arrays.asList(expense));
+		expense.setBudget(budget);
+		
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		window.list("listNeeds").selectItem(0);
+		window.button(JButtonMatcher.withText("Delete Expense")).click();
+		assertThat(expenseItemRepository.findAll()).isEmpty();
+    	
+    }
+    
+
+    
+    
+    
 }
