@@ -27,56 +27,38 @@ public class BudgetRepositorySqlImplementationTest {
     private BudgetRepositorySqlImplementation budgetRepository;
     private SessionFactory sessionFactory;
 
-    // Constants for test values
-    private static final String TEST_BUDGET_1_TITLE = "Luglio 2019";
-    private static final double TEST_BUDGET_1_INCOMES = 1000;
-    private static final String TEST_BUDGET_2_TITLE = "Agosto 2019";
-    private static final double TEST_BUDGET_2_INCOMES = 2000;
-    
-    
-    // Constants for hibernate's session factory 
-    private static final String HIBERNATE_DIALECT = "org.hibernate.dialect.H2Dialect";
-    private static final String HIBERNATE_HBM2DDL_AUTO = "create-drop";
-    private static final String HIBERNATE_SHOW_SQL = "true";
-    private static final String HIBERNATE_CONNECTION_DRIVER_CLASS = "org.h2.Driver";
-    private static final String HIBERNATE_CONNECTION_URL = "jdbc:h2:mem:test;MODE=MySQL;";
-    private static final String HIBERNATE_CONNECTION_USERNAME = "sa";
-    private static final String HIBERNATE_CONNECTION_PASSWORD = "";
-    private static final String HIBERNATE_CONNECTION_AUTOCOMMIT = "false";
-
     @Before
     public void setUp() {
         sessionFactory = new Configuration()
-                .setProperty("hibernate.dialect", HIBERNATE_DIALECT)
-                //with create-drop behavior every time drop and create the Budget's table
-                .setProperty("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO)
-                .setProperty("hibernate.show_sql", HIBERNATE_SHOW_SQL)
-                .setProperty("hibernate.connection.driver_class", HIBERNATE_CONNECTION_DRIVER_CLASS)
-                .setProperty("hibernate.connection.url", HIBERNATE_CONNECTION_URL)
-                .setProperty("hibernate.connection.username", HIBERNATE_CONNECTION_USERNAME)
-                .setProperty("hibernate.connection.password", HIBERNATE_CONNECTION_PASSWORD)
-                .setProperty("hibernate.connection.autocommit", HIBERNATE_CONNECTION_AUTOCOMMIT)
-				.addAnnotatedClass(User.class)
-				.addAnnotatedClass(Budget.class)
-				.addAnnotatedClass(ExpenseItem.class)
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .setProperty("hibernate.show_sql", "true")
+                .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:test;MODE=MySQL;")
+                .setProperty("hibernate.connection.username", "sa")
+                .setProperty("hibernate.connection.password", "")
+                .setProperty("hibernate.connection.autocommit", "false")
+                .addAnnotatedClass(User.class)
+                .addAnnotatedClass(Budget.class)
+                .addAnnotatedClass(ExpenseItem.class)
                 .buildSessionFactory();
 
         budgetRepository = new BudgetRepositorySqlImplementation(sessionFactory);
     }
-  
+
     @After
     public void tearDown() {
         if (sessionFactory != null) {
             sessionFactory.close();
         }
     }
-    
+
     private void deleteBudgetTable() {
-    	Session session = sessionFactory.openSession();
-	    session.beginTransaction();
-	    session.createNativeQuery("DROP TABLE IF EXISTS budgets CASCADE;").executeUpdate();
-	    session.getTransaction().commit();
-	    session.close();
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        session.createNativeQuery("DROP TABLE IF EXISTS budgets CASCADE;").executeUpdate();
+        session.getTransaction().commit();
+        session.close();
     }
 
     private List<Budget> getBudgetsFromDatabaseManually() {
@@ -85,126 +67,175 @@ public class BudgetRepositorySqlImplementationTest {
         session.close();
         return budgets;
     }
-    
-    //TODO: remove setid
-    private Budget saveBudgetManually(String title, double incomes) {
-    	Budget budget = new Budget(title, incomes);
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-		Serializable id = session.save(budget);
-		budget.setId((long) id);
-		session.getTransaction().commit();
-		session.close();
-		return budget;
-	}
-    
+
+    private Budget saveBudgetManually(Budget budget) {
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Serializable id = session.save(budget);
+        budget.setId((long) id);
+        session.getTransaction().commit();
+        session.close();
+        return budget;
+    }
+
+    private User saveUserManually(String name, String surname) {
+        User user = new User(name, surname);
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Serializable id = session.save(user);
+        user.setId((long) id);
+        session.getTransaction().commit();
+        session.close();
+        return user;
+    }
+
+    @Test
+    public void testFindByUserId() {
+        User user1 = saveUserManually("testname1", "testsurname1");
+        User user2 = saveUserManually("testname2", "testsurname2");
+
+        Budget budget1 = new Budget("testtitle1", 1000);
+        budget1.setUser(user1);
+        Budget budget2 = new Budget("testtitle2", 2000);
+        budget2.setUser(user2);
+
+        saveBudgetManually(budget1);
+        saveBudgetManually(budget2);
+
+        List<Budget> budgets = budgetRepository.findByUserId(user1.getId());
+
+        assertThat(budgets).hasSize(1);
+        assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle1");
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(1000);
+        assertThat(budgetRepository.getSession().isOpen()).isFalse();
+    }
+
+    @Test
+    public void testFindByUserIdWhenNoBudgetsExistForUser() {
+        User user = saveUserManually("testname", "testsurname");
+
+        List<Budget> budgets = budgetRepository.findByUserId(user.getId());
+
+        assertThat(budgets).isEmpty();
+        assertThat(budgetRepository.getSession().isOpen()).isFalse();
+    }
+
+    @Test
+    public void testFindByUserIdWhenBudgetTableDoesNotExist() {
+        deleteBudgetTable();
+
+        User user = saveUserManually("Giovanni", "Bianchi");
+
+        assertThrows(PersistenceException.class, () -> budgetRepository.findByUserId(user.getId()));
+        assertThat(budgetRepository.getSession().isOpen()).isFalse();
+    }
+
     @Test
     public void testFindAll() {
+        saveBudgetManually(new Budget("testtitle1", 1000));
+        saveBudgetManually(new Budget("testtitle2", 2000));
 
-    	Budget budget1 = saveBudgetManually(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
-    	Budget budget2 = saveBudgetManually(TEST_BUDGET_2_TITLE, TEST_BUDGET_2_INCOMES);
-        
         List<Budget> budgets = budgetRepository.findAll();
-        
+
         assertThat(budgetRepository.getSession().isOpen()).isFalse();
         assertThat(budgets).hasSize(2);
-        assertThat(budgets.get(0).getTitle()).isEqualTo(budget1.getTitle());
-        assertThat(budgets.get(0).getIncomes()).isEqualTo(budget1.getIncomes());
-        assertThat(budgets.get(1).getTitle()).isEqualTo(budget2.getTitle());
-        assertThat(budgets.get(1).getIncomes()).isEqualTo(budget2.getIncomes());
+        assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle1");
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(1000);
+        assertThat(budgets.get(1).getTitle()).isEqualTo("testtitle2");
+        assertThat(budgets.get(1).getIncomes()).isEqualTo(2000);
     }
-    
+
     @Test
     public void testFindAllEmptyDb() {
-    	List<Budget> budgets = budgetRepository.findAll();
-		
-    	assertThat(budgets).isEmpty();
-		assertThat(budgetRepository.getSession().isOpen()).isFalse();
+        List<Budget> budgets = budgetRepository.findAll();
+
+        assertThat(budgets).isEmpty();
+        assertThat(budgetRepository.getSession().isOpen()).isFalse();
     }
-    
+
     @Test
     public void testFindAllWhenBudgetTableDontExists() {
-    	deleteBudgetTable();
-    	
-    	assertThrows(PersistenceException.class, () -> budgetRepository.findAll());
-		assertThat(budgetRepository.getSession().isOpen()).isFalse();
+        deleteBudgetTable();
+
+        assertThrows(PersistenceException.class, () -> budgetRepository.findAll());
+        assertThat(budgetRepository.getSession().isOpen()).isFalse();
     }
 
     @Test
     public void testSaveBudget() {
-        Budget budget = new Budget(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
+        Budget budget = new Budget("testtitle1", 1000);
 
         budgetRepository.save(budget);
         List<Budget> budgets = getBudgetsFromDatabaseManually();
-        
+
         Session session = budgetRepository.getSession();
-        
+
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
         assertThat(session.isOpen()).isFalse();
         assertThat(budgets).hasSize(1);
-        assertThat(budgets.get(0).getTitle()).isEqualTo(TEST_BUDGET_1_TITLE);
-        assertThat(budgets.get(0).getIncomes()).isEqualTo(TEST_BUDGET_1_INCOMES);
+        assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle1");
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(1000);
     }
-    
-    @Test
-	public void testSaveBudgetWhenBudgetIsAlreadyInDB() {
-    	Budget budget = saveBudgetManually(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
-		assertThrows(ConstraintViolationException.class, () -> budgetRepository.save(budget));
-		Session session = budgetRepository.getSession();
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
-        assertThat(session.isOpen()).isFalse();
-		assertThat(getBudgetsFromDatabaseManually()).hasSize(1);
-	}
 
     @Test
-	public void testDeleteBudget() {
-    	Budget budget = saveBudgetManually(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
-		budgetRepository.delete(budget);
-		List<Budget> budgets = getBudgetsFromDatabaseManually();
-		
-		Session session = budgetRepository.getSession();
-		
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+    public void testSaveBudgetWhenBudgetIsAlreadyInDB() {
+    	User user = saveUserManually("testname1", "testsurname1");
+        Budget budgetToSave = new Budget("testtitle1", 1000);
+        budgetToSave.setUser(user);
+        Budget budget = saveBudgetManually(budgetToSave);
+        assertThrows(ConstraintViolationException.class, () -> budgetRepository.save(budget));
+        Session session = budgetRepository.getSession();
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+        assertThat(session.isOpen()).isFalse();
+        assertThat(getBudgetsFromDatabaseManually()).hasSize(1);
+    }
+
+    @Test
+    public void testDeleteBudget() {
+        Budget budget = saveBudgetManually(new Budget("testtitle1", 1000));
+        budgetRepository.delete(budget);
+        List<Budget> budgets = getBudgetsFromDatabaseManually();
+
+        Session session = budgetRepository.getSession();
+
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
         assertThat(session.isOpen()).isFalse();
         assertThat(budgets).isEmpty();
-	}
+    }
 
-	@Test
-	public void testDeleteBudgetThatIsNotInDB() {
-		Budget budget = new Budget(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
-		budget.setId(1);
-		assertThrows(OptimisticLockException.class, () -> budgetRepository.delete(budget));
-		Session session = budgetRepository.getSession();
-		assertThat(session.isOpen()).isFalse();
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
-	}
-	
     @Test
-	public void testUpdateBudget() {
-    	Budget budget = saveBudgetManually(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
-    	budget.setTitle(TEST_BUDGET_2_TITLE);
-    	budget.setIncomes(TEST_BUDGET_2_INCOMES);
-		budgetRepository.update(budget);
-		List<Budget> budgets = getBudgetsFromDatabaseManually();
-		
-		Session session = budgetRepository.getSession();
-		
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
-		assertThat(budgets).hasSize(1);
-	    assertThat(budgets.get(0).getTitle()).isEqualTo(TEST_BUDGET_2_TITLE);
-	    assertThat(budgets.get(0).getIncomes()).isEqualTo(TEST_BUDGET_2_INCOMES);
-	}
+    public void testDeleteBudgetThatIsNotInDB() {
+        Budget budget = new Budget("testtitle1", 1000);
+        budget.setId(1);
+        assertThrows(OptimisticLockException.class, () -> budgetRepository.delete(budget));
+        Session session = budgetRepository.getSession();
+        assertThat(session.isOpen()).isFalse();
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+    }
 
-	@Test
-	public void testUpdateBudgetThatIsNotInDB() {
-		Budget budget = new Budget(TEST_BUDGET_1_TITLE, TEST_BUDGET_1_INCOMES);
-		budget.setId(1);
-		assertThrows(OptimisticLockException.class, () -> budgetRepository.update(budget));
-		Session session = budgetRepository.getSession();
-		assertThat(session.isOpen()).isFalse();
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
-	
-    
-	}
-    
+    @Test
+    public void testUpdateBudget() {
+        Budget budget = saveBudgetManually(new Budget("testtitle1", 1000));
+        budget.setTitle("testtitle2");
+        budget.setIncomes(2000);
+        budgetRepository.update(budget);
+        List<Budget> budgets = getBudgetsFromDatabaseManually();
+
+        Session session = budgetRepository.getSession();
+
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+        assertThat(budgets).hasSize(1);
+        assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
+    }
+
+    @Test
+    public void testUpdateBudgetThatIsNotInDB() {
+        Budget budget = new Budget("testtitle1", 1000);
+        budget.setId(1);
+        assertThrows(OptimisticLockException.class, () -> budgetRepository.update(budget));
+        Session session = budgetRepository.getSession();
+        assertThat(session.isOpen()).isFalse();
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+    }
 }

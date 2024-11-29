@@ -13,22 +13,27 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "budgets")
+
+@Table(
+	name = "budgets",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"title", "user_id"})
+)
 public class Budget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name= "title", nullable = false, unique = true)
+    @Column(name= "title", nullable = false)
     private String title;
     
-    @Column(name = "incomes", nullable = false, unique = true)
+    @Column(name = "incomes", nullable = false)
     private double incomes;
     
-    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ExpenseItem> expenseItems;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,6 +44,12 @@ public class Budget {
 	
     public Budget(String title, double incomes) {
 		this.title = title;
+		this.incomes = incomes;
+	}
+    
+    public Budget(long id, String title, double incomes) {
+		this.id = id;
+    	this.title = title;
 		this.incomes = incomes;
 	}
 
@@ -78,13 +89,9 @@ public class Budget {
 		return user;
 	}
 
-
-
 	public void setUser(User user) {
 		this.user = user;
 	}
-
-
 
 	@Override
     public String toString() {

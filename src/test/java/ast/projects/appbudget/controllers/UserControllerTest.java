@@ -1,6 +1,5 @@
 package ast.projects.appbudget.controllers;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -29,12 +28,6 @@ public class UserControllerTest {
 
     private AutoCloseable closeable;
 
-    private static final String TEST_USER_NAME = "John";
-    private static final String TEST_USER_SURNAME = "Doe";
-    private static final String ERROR_MESSAGE_SAVE_FAILED = "Error adding new user";
-    private static final String ERROR_MESSAGE_FETCH_FAILED = "Error fetching users";
-    private static final String ERROR_MESSAGE_DELETE_FAILED = "Error deleting user";
-
     @Before
     public void setup() {
         closeable = MockitoAnnotations.openMocks(this);
@@ -47,7 +40,7 @@ public class UserControllerTest {
 
     @Test
     public void testAddUserSuccess() {
-        User user = new User(TEST_USER_NAME, TEST_USER_SURNAME);
+        User user = new User("testname", "testsurname");
         when(userRepository.findAll()).thenReturn(Arrays.asList(user));
         userController.addUser(user);
 
@@ -59,13 +52,13 @@ public class UserControllerTest {
     @Test
     public void testAddUserFailure() {
         doThrow(new RuntimeException()).when(userRepository).save(any(User.class));
-        userController.addUser(new User(TEST_USER_NAME, TEST_USER_SURNAME));
-        verify(budgetAppView).showUserErrorMessage(ERROR_MESSAGE_SAVE_FAILED);
+        userController.addUser(new User("testname", "testsurname"));
+        verify(budgetAppView).showUserErrorMessage("Error adding new user");
     }
 
     @Test
     public void testAllUserSuccess() {
-        List<User> users = Arrays.asList(new User(TEST_USER_NAME, TEST_USER_SURNAME));
+        List<User> users = Arrays.asList(new User("testname", "testsurname"));
         when(userRepository.findAll()).thenReturn(users);
         userController.allUsers();
         verify(budgetAppView).refreshUsersList(users);
@@ -76,12 +69,12 @@ public class UserControllerTest {
     public void testAllUserFailure() {
         doThrow(new RuntimeException()).when(userRepository).findAll();
         userController.allUsers();
-        verify(budgetAppView).showUserErrorMessage(ERROR_MESSAGE_FETCH_FAILED);
+        verify(budgetAppView).showUserErrorMessage("Error fetching users");
     }
     
     @Test
     public void testDeleteUserSuccess() {
-        User user = new User(TEST_USER_NAME, TEST_USER_SURNAME);
+        User user = new User("testname", "testsurname");
         when(userRepository.findAll()).thenReturn(Arrays.asList());
         userController.deleteUser(user);
         verify(userRepository).delete(user);
@@ -91,10 +84,9 @@ public class UserControllerTest {
     
     @Test
     public void testDeleteUserFailure() {
-        User user = new User(TEST_USER_NAME, TEST_USER_SURNAME);
+        User user = new User("testname", "testsurname");
         doThrow(new RuntimeException()).when(userRepository).delete(any(User.class));
         userController.deleteUser(user);
-        verify(budgetAppView).showUserErrorMessage(ERROR_MESSAGE_DELETE_FAILED);
+        verify(budgetAppView).showUserErrorMessage("Error deleting user");
     }
 }
-

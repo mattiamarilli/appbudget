@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,7 +26,7 @@ public class User {
     @Column(name = "surname", nullable = false, unique = true)
     private String surname;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Budget> budgets;
 
 	public User() {}
@@ -35,7 +36,6 @@ public class User {
         this.surname = surname;
     }
     
-    //TODO: try to remove
     public User(long id, String name, String surname) {
         this.id = id;
         this.name = name;

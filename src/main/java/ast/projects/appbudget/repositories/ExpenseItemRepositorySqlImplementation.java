@@ -26,7 +26,8 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
     }
 
     public void save(ExpenseItem expenseItem) {
-        session = getSessionFactory().openSession();
+        Session session = getSessionFactory().openSession();
+        this.session = session;
         try {
             session.beginTransaction();
             session.save(expenseItem);
@@ -40,7 +41,8 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
     }
 
     public void update(ExpenseItem expenseItem) {
-        session = getSessionFactory().openSession();
+        Session session = getSessionFactory().openSession();
+        this.session = session;
         try {
             session.beginTransaction();
             session.update(expenseItem);
@@ -54,7 +56,8 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
     }
 
     public void delete(ExpenseItem expenseItem) {
-        session = getSessionFactory().openSession();
+        Session session = getSessionFactory().openSession();
+        this.session = session;
         try {
             session.beginTransaction();
             session.delete(expenseItem);
@@ -68,7 +71,8 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
     }
 
     public List<ExpenseItem> findAll() {
-        session = getSessionFactory().openSession();
+        Session session = getSessionFactory().openSession();
+        this.session = session;
         List<ExpenseItem> expenseItems;
         try {
             Query<ExpenseItem> query = session.createQuery("FROM ExpenseItem", ExpenseItem.class);
@@ -80,4 +84,22 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
         }
         return expenseItems;
     }
+    
+    @Override
+    public List<ExpenseItem> findByBudgetId(long budgetId) {
+        Session session = getSessionFactory().openSession();
+        this.session = session;
+        List<ExpenseItem> expenseItems;
+        try {
+            Query<ExpenseItem> query = session.createQuery("FROM ExpenseItem e WHERE e.budget.id = :budgetId", ExpenseItem.class);
+            query.setParameter("budgetId", budgetId);
+            expenseItems = query.list();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            session.close();
+        }
+        return expenseItems;
+    }
+
 }

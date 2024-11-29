@@ -13,10 +13,6 @@ public class UserRepositorySqlImplementation implements UserRepository {
     private SessionFactory sessionFactory;
     private Session session;
 
-    Session getSession() {
-		return session;
-	}
-
 	public UserRepositorySqlImplementation(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
@@ -25,25 +21,31 @@ public class UserRepositorySqlImplementation implements UserRepository {
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
 	}
+	
+	Session getSession() {
+		return session;
+	}
+	
 
 	@Override
 	public void save(User user) {
-	    session = getSessionFactory().openSession();
+	    Session session = getSessionFactory().openSession();
+	    this.session = session;
 	    try {
 	        session.beginTransaction();
 	        session.save(user);
 	        session.getTransaction().commit();
 	    } catch (Exception e) {
-	        session.getTransaction().rollback();
+	    	session.getTransaction().rollback();
 	        throw e;
 	    } finally {
 	        session.close();
 	    }
 	}
-
 	@Override
 	public void delete(User user) {
-	    session = getSessionFactory().openSession();
+		Session session = getSessionFactory().openSession();
+		this.session = session;
 	    try {
 	        session.beginTransaction();
 	        session.delete(user);
@@ -58,7 +60,8 @@ public class UserRepositorySqlImplementation implements UserRepository {
 
 	@Override
 	public List<User> findAll() {
-	    session = getSessionFactory().openSession();
+		Session session = getSessionFactory().openSession();
+		this.session = session;
 	    List<User> users;
 	    try {
 	        Query<User> query = session.createQuery("FROM User", User.class);

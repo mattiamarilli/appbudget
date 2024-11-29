@@ -14,10 +14,12 @@ public interface BudgetAppView{
 	
 	void refreshBudgetsList(List<Budget> budgets);
 	void showBudgetErrorMessage(String message);
+	void clearBudgetInputs();
 	void resetBudgetErrorMessage();
 	
 	void refreshExpenseItemsLists(List<ExpenseItem> expenseItems);
 	void showExpenseItemErrorMessage(String message);
+	void clearExpenseItemInputs();
 	void resetExpenseItemErrorMessage();
 
 }

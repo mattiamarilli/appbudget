@@ -7,6 +7,8 @@ import ast.projects.appbudget.models.Budget;
 public interface BudgetRepository {
 
 	public List<Budget> findAll();
+	
+	public List<Budget> findByUserId(long id);
 
 	public void save(Budget budget);
 	

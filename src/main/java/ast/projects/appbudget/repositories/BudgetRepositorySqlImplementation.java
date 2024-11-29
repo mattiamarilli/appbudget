@@ -28,7 +28,8 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 
 	@Override
 	public void save(Budget budget) {
-	    session = getSessionFactory().openSession();
+	    Session session = getSessionFactory().openSession();
+	    this.session = session;
 	    try {
 	        session.beginTransaction();
 	        session.save(budget);
@@ -43,7 +44,8 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 	
 	@Override
 	public void update(Budget budget) {
-	    session = getSessionFactory().openSession();
+	    Session session = getSessionFactory().openSession();
+	    this.session = session;
 	    try {
 	        session.beginTransaction();
 	        session.update(budget);
@@ -58,7 +60,8 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 
 	@Override
 	public void delete(Budget budget) {
-	    session = getSessionFactory().openSession();
+	    Session session = getSessionFactory().openSession();
+	    this.session = session;
 	    try {
 	        session.beginTransaction();
 	        session.delete(budget);
@@ -73,7 +76,8 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 
 	@Override
 	public List<Budget> findAll() {
-	    session = getSessionFactory().openSession();
+	    Session session = getSessionFactory().openSession();
+	    this.session = session;
 	    List<Budget> budgets;
 	    try {
 	        Query<Budget> query = session.createQuery("FROM Budget", Budget.class);
@@ -85,4 +89,22 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 	    }
 	    return budgets;
 	}
+	
+	@Override
+	public List<Budget> findByUserId(long userId) {
+	    Session session = getSessionFactory().openSession();
+	    this.session = session;
+	    List<Budget> budgets;
+	    try {
+	        Query<Budget> query = session.createQuery("FROM Budget b WHERE b.user.id = :userId", Budget.class);
+	        query.setParameter("userId", userId);
+	        budgets = query.list();
+	    } catch (Exception e) {
+	        throw e;
+	    } finally {
+	        session.close();
+	    }
+	    return budgets;
+	}
+
 }

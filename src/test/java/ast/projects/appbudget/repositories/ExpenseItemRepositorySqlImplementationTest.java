@@ -28,35 +28,16 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	private ExpenseItemRepositorySqlImplementation expenseItemRepository;
 	private SessionFactory sessionFactory;
 
-	// Constants for test values
-	private static final String TEST_EXPENSEITEM_1_TITLE = "Rent";
-	private static final double TEST_EXPENSEITEM_1_AMOUNT = 500;
-	private static final Type TEST_EXPENSEITEM_1_TYPE = Type.NEEDS;
-	private static final String TEST_EXPENSEITEM_2_TITLE = "Groceries";
-	private static final double TEST_EXPENSEITEM_2_AMOUNT = 150;
-	private static final Type TEST_EXPENSEITEM_2_TYPE = Type.WANTS;
-
-	// Constants for hibernate's session factory
-	private static final String HIBERNATE_DIALECT = "org.hibernate.dialect.H2Dialect";
-	private static final String HIBERNATE_HBM2DDL_AUTO = "create-drop";
-	private static final String HIBERNATE_SHOW_SQL = "true";
-	private static final String HIBERNATE_CONNECTION_DRIVER_CLASS = "org.h2.Driver";
-	private static final String HIBERNATE_CONNECTION_URL = "jdbc:h2:mem:test;MODE=MySQL;";
-	private static final String HIBERNATE_CONNECTION_USERNAME = "sa";
-	private static final String HIBERNATE_CONNECTION_PASSWORD = "";
-	private static final String HIBERNATE_CONNECTION_AUTOCOMMIT = "false";
-
 	@Before
 	public void setUp() {
-		sessionFactory = new Configuration().setProperty("hibernate.dialect", HIBERNATE_DIALECT)
-				// with create-drop behavior every time drop and create the ExpenseItem's table
-				.setProperty("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO)
-				.setProperty("hibernate.show_sql", HIBERNATE_SHOW_SQL)
-				.setProperty("hibernate.connection.driver_class", HIBERNATE_CONNECTION_DRIVER_CLASS)
-				.setProperty("hibernate.connection.url", HIBERNATE_CONNECTION_URL)
-				.setProperty("hibernate.connection.username", HIBERNATE_CONNECTION_USERNAME)
-				.setProperty("hibernate.connection.password", HIBERNATE_CONNECTION_PASSWORD)
-				.setProperty("hibernate.connection.autocommit", HIBERNATE_CONNECTION_AUTOCOMMIT)
+		sessionFactory = new Configuration().setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
+				.setProperty("hibernate.hbm2ddl.auto", "create-drop")
+				.setProperty("hibernate.show_sql", "true")
+				.setProperty("hibernate.connection.driver_class", "org.h2.Driver")
+				.setProperty("hibernate.connection.url", "jdbc:h2:mem:test;MODE=MySQL;")
+				.setProperty("hibernate.connection.username", "sa")
+				.setProperty("hibernate.connection.password", "")
+				.setProperty("hibernate.connection.autocommit", "false")
 				.addAnnotatedClass(User.class)
 				.addAnnotatedClass(Budget.class)
 				.addAnnotatedClass(ExpenseItem.class)
@@ -72,39 +53,98 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		}
 	}
 
+	// Helper functions for ExpenseItem
+
 	private void deleteExpenseItemTable() {
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-		session.createNativeQuery("DROP TABLE IF EXISTS expenseitems CASCADE;").executeUpdate();
-		session.getTransaction().commit();
-		session.close();
+	    Session session = sessionFactory.openSession();
+	    session.beginTransaction();
+	    session.createNativeQuery("DROP TABLE IF EXISTS expenseitems CASCADE;").executeUpdate();
+	    session.getTransaction().commit();
+	    session.close();
 	}
 
 	private List<ExpenseItem> getExpenseItemsFromDatabaseManually() {
-		Session session = sessionFactory.openSession();
-		List<ExpenseItem> expenseItems = session.createQuery("FROM ExpenseItem", ExpenseItem.class).list();
-		session.close();
-		return expenseItems;
+	    Session session = sessionFactory.openSession();
+	    List<ExpenseItem> expenseItems = session.createQuery("FROM ExpenseItem", ExpenseItem.class).list();
+	    session.close();
+	    return expenseItems;
 	}
 
-	private ExpenseItem saveExpenseItemManually(String title, Type type, double amount) {
-		ExpenseItem expenseItem = new ExpenseItem(title, type, amount);
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-		Serializable id = session.save(expenseItem);
-		expenseItem.setId((long) id);
-		session.getTransaction().commit();
-		session.close();
-		return expenseItem;
+	private ExpenseItem saveExpenseItemManually(ExpenseItem expenseItem) {
+	    Session session = sessionFactory.openSession();
+	    session.beginTransaction();
+	    Serializable id = session.save(expenseItem);
+	    expenseItem.setId((long) id);
+	    session.getTransaction().commit();
+	    session.close();
+	    return expenseItem;
 	}
+
+	private Budget saveBudgetManually(Budget budget) {
+	    Session session = sessionFactory.openSession();
+	    session.beginTransaction();
+	    Serializable id = session.save(budget);
+	    budget.setId((long) id);
+	    session.getTransaction().commit();
+	    session.close();
+	    return budget;
+	}
+
+	@Test
+	public void testFindByBudgetId() {
+
+	    Budget budget1 = new Budget("testtitle1", 1000);
+	    Budget budget2 = new Budget("testtitle2", 2000);
+
+	    saveBudgetManually(budget1);
+	    saveBudgetManually(budget2);
+
+	    ExpenseItem expenseItem1 = new ExpenseItem("testtitle1", Type.NEEDS, 50);
+	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle2", Type.WANTS, 15);
+
+	    expenseItem1.setBudget(budget1);
+	    expenseItem2.setBudget(budget2);
+
+	    saveExpenseItemManually(expenseItem1);
+	    saveExpenseItemManually(expenseItem2);
+
+	    List<ExpenseItem> expenseItems = expenseItemRepository.findByBudgetId(budget1.getId());
+
+	    assertThat(expenseItems).hasSize(1);
+	    assertThat(expenseItems.get(0).getTitle()).isEqualTo(expenseItem1.getTitle());
+	    assertThat(expenseItems.get(0).getAmount()).isEqualTo(expenseItem1.getAmount());
+	    assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
+	}
+
+	@Test
+	public void testFindByBudgetIdWhenNoExpenseItemsExistForBudget() {
+
+		Budget budget = new Budget("testtitle1", 1000);
+	    saveBudgetManually(budget);
+
+	    List<ExpenseItem> expenseItems = expenseItemRepository.findByBudgetId(budget.getId());
+
+	    assertThat(expenseItems).isEmpty();
+	    assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
+	}
+
+	@Test
+	public void testFindByBudgetIdWhenExpenseItemTableDoesNotExist() {
+	    deleteExpenseItemTable();
+
+	    Budget budget = new Budget("testtitle1", 1000);
+	    saveBudgetManually(budget);
+
+	    assertThrows(PersistenceException.class, () -> expenseItemRepository.findByBudgetId(budget.getId()));
+	    assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
+	}
+
 
 	@Test
 	public void testFindAll() {
 
-		ExpenseItem expenseItem1 = saveExpenseItemManually(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
-		ExpenseItem expenseItem2 = saveExpenseItemManually(TEST_EXPENSEITEM_2_TITLE, TEST_EXPENSEITEM_2_TYPE,
-				TEST_EXPENSEITEM_2_AMOUNT);
+		ExpenseItem expenseItem1 = saveExpenseItemManually(new ExpenseItem("testtitle1", Type.NEEDS, 50));
+		ExpenseItem expenseItem2 = saveExpenseItemManually(new ExpenseItem("testtitle2", Type.WANTS, 15));
 
 		List<ExpenseItem> expenseItems = expenseItemRepository.findAll();
 
@@ -137,8 +177,7 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	@Test
 	public void testSaveExpenseItem() {
-		ExpenseItem expenseItem = new ExpenseItem(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
+		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 
 		expenseItemRepository.save(expenseItem);
 		List<ExpenseItem> expenseItems = getExpenseItemsFromDatabaseManually();
@@ -148,15 +187,23 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
 		assertThat(session.isOpen()).isFalse();
 		assertThat(expenseItems).hasSize(1);
-		assertThat(expenseItems.get(0).getTitle()).isEqualTo(TEST_EXPENSEITEM_1_TITLE);
-		assertThat(expenseItems.get(0).getAmount()).isEqualTo(TEST_EXPENSEITEM_1_AMOUNT);
-		assertThat(expenseItems.get(0).getType()).isEqualTo(TEST_EXPENSEITEM_1_TYPE);
+		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitle1");
+		assertThat(expenseItems.get(0).getAmount()).isEqualTo(50);
+		assertThat(expenseItems.get(0).getType()).isEqualTo(Type.NEEDS);
 	}
 
 	@Test
 	public void testSaveExpenseItemWhenExpenseItemIsAlreadyInDB() {
-		ExpenseItem expenseItem = saveExpenseItemManually(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
+		
+	    Budget budget = new Budget("testtitle1", 1000);
+	    saveBudgetManually(budget);
+	    
+	    ExpenseItem expenseItemToSave = new ExpenseItem("testtitle1", Type.NEEDS, 50);
+	    
+	    expenseItemToSave.setBudget(budget);	
+		
+		ExpenseItem expenseItem = saveExpenseItemManually(expenseItemToSave);
+		
 		assertThrows(ConstraintViolationException.class, () -> expenseItemRepository.save(expenseItem));
 		Session session = expenseItemRepository.getSession();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
@@ -166,8 +213,7 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	@Test
 	public void testDeleteExpenseItem() {
-		ExpenseItem expenseItem = saveExpenseItemManually(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
+		ExpenseItem expenseItem = saveExpenseItemManually(new ExpenseItem("testtitle1", Type.NEEDS, 50));
 		expenseItemRepository.delete(expenseItem);
 		List<ExpenseItem> expenseItems = getExpenseItemsFromDatabaseManually();
 
@@ -180,8 +226,7 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	@Test
 	public void testDeleteExpenseItemThatIsNotInDB() {
-		ExpenseItem expenseItem = new ExpenseItem(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
+		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 		expenseItem.setId(1);
 		assertThrows(OptimisticLockException.class, () -> expenseItemRepository.delete(expenseItem));
 		Session session = expenseItemRepository.getSession();
@@ -191,32 +236,24 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	@Test
 	public void testUpdateExpenseItem() {
-		ExpenseItem expenseItem = saveExpenseItemManually(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
-		expenseItem.setTitle(TEST_EXPENSEITEM_2_TITLE);
-		expenseItem.setType(TEST_EXPENSEITEM_2_TYPE);
-		expenseItem.setAmount(TEST_EXPENSEITEM_2_AMOUNT);
+		ExpenseItem expenseItem = saveExpenseItemManually(new ExpenseItem("testtitle1", Type.NEEDS, 50));
+		expenseItem.setTitle("updatedtitle");
+		expenseItem.setAmount(100);
 		expenseItemRepository.update(expenseItem);
-		List<ExpenseItem> expenseItems = getExpenseItemsFromDatabaseManually();
+		ExpenseItem updatedExpenseItem = getExpenseItemsFromDatabaseManually().get(0);
 
-		Session session = expenseItemRepository.getSession();
-
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
-		assertThat(expenseItems.get(0).getTitle()).isEqualTo(TEST_EXPENSEITEM_2_TITLE);
-		assertThat(expenseItems.get(0).getAmount()).isEqualTo(TEST_EXPENSEITEM_2_AMOUNT);
-		assertThat(expenseItems.get(0).getType()).isEqualTo(TEST_EXPENSEITEM_2_TYPE);
+		assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
+		assertThat(updatedExpenseItem.getTitle()).isEqualTo("updatedtitle");
+		assertThat(updatedExpenseItem.getAmount()).isEqualTo(100);
 	}
 
 	@Test
-	public void testUpdateExpenseItemThatIsNotInDB() {
-		ExpenseItem expenseItem = new ExpenseItem(TEST_EXPENSEITEM_1_TITLE, TEST_EXPENSEITEM_1_TYPE,
-				TEST_EXPENSEITEM_1_AMOUNT);
+	public void testUpdateExpenseItemNotInDB() {
+		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 		expenseItem.setId(1);
 		assertThrows(OptimisticLockException.class, () -> expenseItemRepository.update(expenseItem));
 		Session session = expenseItemRepository.getSession();
 		assertThat(session.isOpen()).isFalse();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
-
 	}
-
 }

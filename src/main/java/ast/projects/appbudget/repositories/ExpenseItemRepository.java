@@ -7,6 +7,8 @@ import ast.projects.appbudget.models.ExpenseItem;
 public interface ExpenseItemRepository {
 
 	public List<ExpenseItem> findAll();
+	
+	public List<ExpenseItem> findByBudgetId(long id);
 
 	public void save(ExpenseItem expenseItem);
 	

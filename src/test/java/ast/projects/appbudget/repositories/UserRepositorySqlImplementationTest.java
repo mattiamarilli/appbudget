@@ -26,38 +26,20 @@ public class UserRepositorySqlImplementationTest {
     private UserRepositorySqlImplementation userRepository;
     private SessionFactory sessionFactory;
 
-    // Constants for test values
-    private static final String TEST_USER_1_NAME = "Mario";
-    private static final String TEST_USER_1_SURNAME = "Rossi";
-    private static final String TEST_USER_2_NAME = "Luigi";
-    private static final String TEST_USER_2_SURNAME = "Bianchi";
-    
-    
-    // Constants for hibernate's session factory 
-    private static final String HIBERNATE_DIALECT = "org.hibernate.dialect.H2Dialect";
-    private static final String HIBERNATE_HBM2DDL_AUTO = "create-drop";
-    private static final String HIBERNATE_SHOW_SQL = "true";
-    private static final String HIBERNATE_CONNECTION_DRIVER_CLASS = "org.h2.Driver";
-    private static final String HIBERNATE_CONNECTION_URL = "jdbc:h2:mem:test;MODE=MySQL;";
-    private static final String HIBERNATE_CONNECTION_USERNAME = "sa";
-    private static final String HIBERNATE_CONNECTION_PASSWORD = "";
-    private static final String HIBERNATE_CONNECTION_AUTOCOMMIT = "false";
-
     @Before
     public void setUp() {
         sessionFactory = new Configuration()
-                .setProperty("hibernate.dialect", HIBERNATE_DIALECT)
-                //with create-drop behavior every time drop and create the User's table
-                .setProperty("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO)
-                .setProperty("hibernate.show_sql", HIBERNATE_SHOW_SQL)
-                .setProperty("hibernate.connection.driver_class", HIBERNATE_CONNECTION_DRIVER_CLASS)
-                .setProperty("hibernate.connection.url", HIBERNATE_CONNECTION_URL)
-                .setProperty("hibernate.connection.username", HIBERNATE_CONNECTION_USERNAME)
-                .setProperty("hibernate.connection.password", HIBERNATE_CONNECTION_PASSWORD)
-                .setProperty("hibernate.connection.autocommit", HIBERNATE_CONNECTION_AUTOCOMMIT)
-				.addAnnotatedClass(User.class)
-				.addAnnotatedClass(Budget.class)
-				.addAnnotatedClass(ExpenseItem.class)
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .setProperty("hibernate.show_sql", "true")
+                .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:test;MODE=MySQL;")
+                .setProperty("hibernate.connection.username", "sa")
+                .setProperty("hibernate.connection.password", "")
+                .setProperty("hibernate.connection.autocommit", "false")
+                .addAnnotatedClass(User.class)
+                .addAnnotatedClass(Budget.class)
+                .addAnnotatedClass(ExpenseItem.class)
                 .buildSessionFactory();
 
         userRepository = new UserRepositorySqlImplementation(sessionFactory);
@@ -71,36 +53,35 @@ public class UserRepositorySqlImplementationTest {
     }
     
     private void deleteUserTable() {
-    	Session session = sessionFactory.openSession();
-	    session.beginTransaction();
-	    session.createNativeQuery("DROP TABLE IF EXISTS users;").executeUpdate();
-	    session.getTransaction().commit();
-	    session.close();
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.createNativeQuery("DROP TABLE IF EXISTS expenseitems;").executeUpdate();
+            session.createNativeQuery("DROP TABLE IF EXISTS budgets;").executeUpdate();
+            session.createNativeQuery("DROP TABLE IF EXISTS users;").executeUpdate();
+            session.getTransaction().commit();
+        }
     }
 
     private List<User> getUsersFromDatabaseManually() {
-        Session session = sessionFactory.openSession();
-        List<User> users = session.createQuery("FROM User", User.class).list();
-        session.close();
-        return users;
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery("FROM User", User.class).list();
+        }
     }
     
-    private User saveUserManually(String name, String username) {
-		User user = new User(name, username);
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-		Serializable id = session.save(user);
-		user.setId((long) id);
-		session.getTransaction().commit();
-		session.close();
-		return user;
-	}
+    private User saveUserManually(String name, String surname) {
+        User user = new User(name, surname);
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Serializable id = session.save(user);
+        user.setId((Long) id);
+        session.getTransaction().commit();
+        return user;
+    }
     
     @Test
     public void testFindAll() {
-
-    	User user1 = saveUserManually(TEST_USER_1_NAME, TEST_USER_1_SURNAME);
-    	User user2 = saveUserManually(TEST_USER_2_NAME, TEST_USER_2_SURNAME);
+        User user1 = saveUserManually("testname1", "testsurname1");
+        User user2 = saveUserManually("testname2", "testsurname2");
         
         List<User> users = userRepository.findAll();
         
@@ -114,23 +95,23 @@ public class UserRepositorySqlImplementationTest {
     
     @Test
     public void testFindAllEmptyDb() {
-    	List<User> users = userRepository.findAll();
-		
-    	assertThat(users).isEmpty();
-		assertThat(userRepository.getSession().isOpen()).isFalse();
+        List<User> users = userRepository.findAll();
+        
+        assertThat(users).isEmpty();
+        assertThat(userRepository.getSession().isOpen()).isFalse();
     }
     
     @Test
     public void testFindAllWhenUserTableDontExists() {
-    	deleteUserTable();
-    	
-    	assertThrows(PersistenceException.class, () -> userRepository.findAll());
-		assertThat(userRepository.getSession().isOpen()).isFalse();
+        deleteUserTable();
+        
+        assertThrows(PersistenceException.class, () -> userRepository.findAll());
+        assertThat(userRepository.getSession().isOpen()).isFalse();
     }
 
     @Test
     public void testSaveUser() {
-        User user = new User(TEST_USER_1_NAME, TEST_USER_1_SURNAME);
+        User user = new User("testname1", "testsurname1");
 
         userRepository.save(user);
         List<User> users = getUsersFromDatabaseManually();
@@ -140,45 +121,40 @@ public class UserRepositorySqlImplementationTest {
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
         assertThat(session.isOpen()).isFalse();
         assertThat(users).hasSize(1);
-        assertThat(users.get(0).getName()).isEqualTo(TEST_USER_1_NAME);
-        assertThat(users.get(0).getSurname()).isEqualTo(TEST_USER_1_SURNAME);
+        assertThat(users.get(0).getName()).isEqualTo("testname1");
+        assertThat(users.get(0).getSurname()).isEqualTo("testsurname1");
     }
     
     @Test
-	public void testSaveUserWhenUserIsAlreadyInDB() {
-		User user = saveUserManually(TEST_USER_1_NAME, TEST_USER_1_SURNAME);
-		assertThrows(ConstraintViolationException.class, () -> userRepository.save(user));
-		Session session = userRepository.getSession();
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+    public void testSaveUserWhenUserIsAlreadyInDB() {
+        User user = saveUserManually("testname1", "testsurname1");
+        assertThrows(ConstraintViolationException.class, () -> userRepository.save(user));
+        Session session = userRepository.getSession();
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
         assertThat(session.isOpen()).isFalse();
-		assertThat(getUsersFromDatabaseManually()).hasSize(1);
-	}
+        assertThat(getUsersFromDatabaseManually()).hasSize(1);
+    }
 
     @Test
-	public void testDeleteUser() {
-		User user = saveUserManually(TEST_USER_1_NAME, TEST_USER_1_SURNAME);
-		userRepository.delete(user);
-		List<User> users = getUsersFromDatabaseManually();
-		
-		Session session = userRepository.getSession();
-		
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+    public void testDeleteUser() {
+        User user = saveUserManually("testname1", "testsurname1");
+        userRepository.delete(user);
+        List<User> users = getUsersFromDatabaseManually();
+        
+        Session session = userRepository.getSession();
+        
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
         assertThat(session.isOpen()).isFalse();
         assertThat(users).isEmpty();
-	}
+    }
 
-	@Test
-	public void testDeleteUserThatIsNotInDB() {
-		User user = new User(TEST_USER_1_NAME, TEST_USER_1_SURNAME);
-		user.setId(1);
-		assertThrows(OptimisticLockException.class, () -> userRepository.delete(user));
-		Session session = userRepository.getSession();
-		assertThat(session.isOpen()).isFalse();
-		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
-	}
-
-    
-    
-
-    
+    @Test
+    public void testDeleteUserThatIsNotInDB() {
+        User user = new User("testname1", "testsurname1");
+        user.setId(1);
+        assertThrows(OptimisticLockException.class, () -> userRepository.delete(user));
+        Session session = userRepository.getSession();
+        assertThat(session.isOpen()).isFalse();
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+    }
 }
