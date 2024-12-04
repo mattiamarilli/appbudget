@@ -729,11 +729,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listBudgets").clearSelection();
 		
 		String[] listNeedsContents = window.list("listNeeds").contents();
-		assertThat(listNeedsContents).isEmpty();;
+		assertThat(listNeedsContents).isEmpty();
 		String[] listWantsContents = window.list("listWants").contents();
 		assertThat(listWantsContents).isEmpty();
 		String[] listSavingsContents = window.list("listSavings").contents();
-		assertThat(listSavingsContents).isEmpty();;
+		assertThat(listSavingsContents).isEmpty();
 
 		window.textBox("textFieldExpenseItemTitle").requireDisabled();
 		window.textBox("textFieldExpenseItemAmount").requireDisabled();
@@ -895,7 +895,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 
-		verify(budgetController).allBudgetsByUser(user);;
+		verify(budgetController).allBudgetsByUser(user);
 	}
 	
 	@Test

@@ -1,7 +1,6 @@
 package ast.projects.appbudget.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
@@ -91,7 +90,9 @@ public class ExpenseItemControllerIT {
         expenseItemController.addExpenseItem(expenseItemToSave);
         
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
-        assertTrue(expenseItem.getTitle().equals("testtitle") && expenseItem.getAmount() == 10 && expenseItem.getType() == Type.NEEDS);
+        assertThat(expenseItem.getTitle()).isEqualTo("testtitle");
+        assertThat(expenseItem.getAmount()).isEqualTo(10);
+        assertThat(expenseItem.getType()).isEqualTo(Type.NEEDS);
         verify(view).refreshExpenseItemsLists(
                 argThat(expenseItems -> expenseItems.size() == 1 &&
                 		expenseItems.get(0).getId() == 1 &&
@@ -116,7 +117,11 @@ public class ExpenseItemControllerIT {
         expenseItemController.updateExpenseItem(expenseToUpdate);
 
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
-        assertTrue(expenseItem.getTitle().equals("testtitle2") && expenseItem.getAmount() == 20 && expenseItem.getType() == Type.WANTS);
+        
+        assertThat(expenseItem.getTitle()).isEqualTo("testtitle2");
+        assertThat(expenseItem.getAmount()).isEqualTo(20);
+        assertThat(expenseItem.getType()).isEqualTo(Type.WANTS);
+        
         verify(view).refreshExpenseItemsLists(
                 argThat(expenseItems -> expenseItems.size() == 1 &&
                 		expenseItems.get(0).getId() == 1 &&

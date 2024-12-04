@@ -1,7 +1,6 @@
 package ast.projects.appbudget.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
@@ -90,7 +89,8 @@ public class BudgetControllerIT {
     	b.setUser(u);
         budgetController.addBudget(b);
         Budget budget = budgetRepository.findAll().get(0);
-        assertTrue(budget.getTitle().equals("testtitle") && budget.getIncomes() == 2000);
+        assertThat(budget.getTitle()).isEqualTo("testtitle");
+        assertThat(budget.getIncomes()).isEqualTo(2000);
         verify(view).refreshBudgetsList(
                 argThat(budgets -> budgets.size() == 1 &&
                         budgets.get(0).getId() == 1 &&
@@ -114,7 +114,10 @@ public class BudgetControllerIT {
         budgetController.updateBudget(budgetToUpdate);
 
         Budget budget = budgetRepository.findAll().get(0);
-        assertTrue(budget.getTitle().equals("testtitle2") && budget.getIncomes() == 1000);
+        
+        assertThat(budget.getTitle()).isEqualTo("testtitle2");
+        assertThat(budget.getIncomes()).isEqualTo(1000);
+        
         verify(view).refreshBudgetsList(
                 argThat(budgets -> budgets.size() == 1 &&
                         budgets.get(0).getId() == 1 &&

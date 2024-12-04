@@ -1,7 +1,6 @@
 package ast.projects.appbudget.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
@@ -82,7 +81,10 @@ public class UserControllerIT {
     public void testNewUser() {
         userController.addUser(new User("test1name", "test1surname"));
         User user = userRepository.findAll().get(0);
-        assertTrue(user.getName().equals("test1name") && user.getSurname().equals("test1surname"));
+        
+        assertThat(user.getName()).isEqualTo("test1name");
+        assertThat(user.getSurname()).isEqualTo("test1surname");
+        
         verify(view).refreshUsersList(
                 argThat(users -> users.size() == 1 &&
                         users.get(0).getId() == 1 &&

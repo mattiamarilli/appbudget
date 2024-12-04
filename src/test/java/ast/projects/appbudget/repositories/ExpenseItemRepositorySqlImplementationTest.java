@@ -134,8 +134,9 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	    Budget budget = new Budget("testtitle1", 1000);
 	    saveBudgetManually(budget);
+	    long id = budget.getId();
 
-	    assertThrows(PersistenceException.class, () -> expenseItemRepository.findByBudgetId(budget.getId()));
+	    assertThrows(PersistenceException.class, () -> expenseItemRepository.findByBudgetId(id));
 	    assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
 	}
 

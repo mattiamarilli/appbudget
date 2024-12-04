@@ -125,8 +125,9 @@ public class BudgetRepositorySqlImplementationTest {
         deleteBudgetTable();
 
         User user = saveUserManually("Giovanni", "Bianchi");
+        long id = user.getId();
 
-        assertThrows(PersistenceException.class, () -> budgetRepository.findByUserId(user.getId()));
+        assertThrows(PersistenceException.class, () -> budgetRepository.findByUserId(id));
         assertThat(budgetRepository.getSession().isOpen()).isFalse();
     }
 

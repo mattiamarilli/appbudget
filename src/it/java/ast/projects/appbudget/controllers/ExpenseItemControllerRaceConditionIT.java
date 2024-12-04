@@ -1,7 +1,6 @@
 package ast.projects.appbudget.controllers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.util.List;
@@ -108,10 +107,10 @@ public class ExpenseItemControllerRaceConditionIT {
 
 		latch.await();
 		List<ExpenseItem> expenseItemFound = expenseItemRepository.findAll();
-		assertEquals(1, expenseItemFound.size());
-		assertEquals(expenseItemFound.get(0).getTitle(), "testtitle");
-		assertEquals(expenseItemFound.get(0).getType(), Type.NEEDS);
-		assertTrue(expenseItemFound.get(0).getAmount() == 10);
+		assertThat(1).isEqualTo(expenseItemFound.size());
+		assertThat("testtitle").isEqualTo(expenseItemFound.get(0).getTitle());
+		assertThat(Type.NEEDS).isEqualTo(expenseItemFound.get(0).getType());
+		assertThat(expenseItemFound.get(0).getAmount()).isEqualTo(10.0);
 	}
 	
 	@Test
@@ -140,6 +139,6 @@ public class ExpenseItemControllerRaceConditionIT {
 
 	    latch.await();
 	    ExpenseItem updatedExpenseItem = expenseItemRepository.findAll().get(0);
-	    assertEquals(20, updatedExpenseItem.getAmount(), 0.01);
+	    assertThat(updatedExpenseItem.getAmount()).isEqualTo(20.0);
 	}
 }
