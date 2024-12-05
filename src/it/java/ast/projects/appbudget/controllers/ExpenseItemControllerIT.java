@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -142,7 +143,7 @@ public class ExpenseItemControllerIT {
     	expenseItemController.deleteExpenseItem(expenseToDelete);
 
         assertThat(expenseItemRepository.findAll()).isEmpty();
-        verify(view).refreshExpenseItemsLists(argThat(expenseItems -> expenseItems.isEmpty()));
+        verify(view).refreshExpenseItemsLists(argThat(Collection::isEmpty));
     }
     
     @Test

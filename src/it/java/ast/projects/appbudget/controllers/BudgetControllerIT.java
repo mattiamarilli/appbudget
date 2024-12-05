@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -138,7 +139,7 @@ public class BudgetControllerIT {
         budgetController.deleteBudget(budgetToDelete);
 
         assertThat(budgetRepository.findAll()).isEmpty();
-        verify(view).refreshBudgetsList(argThat(budgets -> budgets.isEmpty()));
+        verify(view).refreshBudgetsList(argThat(Collection::isEmpty));
     }
     
     @Test

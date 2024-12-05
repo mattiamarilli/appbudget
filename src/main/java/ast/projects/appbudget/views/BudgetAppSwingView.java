@@ -316,25 +316,25 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		
 		textFieldUserName = new JTextField();
 		textFieldUserName.setName("textFieldUserName");
-		GridBagConstraints gbc_textFieldUserName = new GridBagConstraints();
-		gbc_textFieldUserName.anchor = GridBagConstraints.NORTH;
-		gbc_textFieldUserName.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldUserName.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldUserName.gridx = 1;
-		gbc_textFieldUserName.gridy = 1;
-		panelUsers.add(textFieldUserName, gbc_textFieldUserName);
+		GridBagConstraints gbcTextFieldUserName = new GridBagConstraints();
+		gbcTextFieldUserName.anchor = GridBagConstraints.NORTH;
+		gbcTextFieldUserName.fill = GridBagConstraints.HORIZONTAL;
+		gbcTextFieldUserName.insets = new Insets(0, 0, 5, 5);
+		gbcTextFieldUserName.gridx = 1;
+		gbcTextFieldUserName.gridy = 1;
+		panelUsers.add(textFieldUserName, gbcTextFieldUserName);
 		textFieldUserName.setColumns(10);
 		textFieldUserName.getDocument().addDocumentListener(btnUserAddEnabler);
 
 		textFieldUserSurname = new JTextField();
 		textFieldUserSurname.setName("textFieldUserSurname");
-		GridBagConstraints gbc_textFieldUserSurname = new GridBagConstraints();
-		gbc_textFieldUserSurname.anchor = GridBagConstraints.NORTH;
-		gbc_textFieldUserSurname.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textFieldUserSurname.insets = new Insets(0, 0, 5, 5);
-		gbc_textFieldUserSurname.gridx = 3;
-		gbc_textFieldUserSurname.gridy = 1;
-		panelUsers.add(textFieldUserSurname, gbc_textFieldUserSurname);
+		GridBagConstraints gbcTextFieldUserSurname = new GridBagConstraints();
+		gbcTextFieldUserSurname.anchor = GridBagConstraints.NORTH;
+		gbcTextFieldUserSurname.fill = GridBagConstraints.HORIZONTAL;
+		gbcTextFieldUserSurname.insets = new Insets(0, 0, 5, 5);
+		gbcTextFieldUserSurname.gridx = 3;
+		gbcTextFieldUserSurname.gridy = 1;
+		panelUsers.add(textFieldUserSurname, gbcTextFieldUserSurname);
 		textFieldUserSurname.setColumns(10);
 		textFieldUserSurname.getDocument().addDocumentListener(btnUserAddEnabler);
 
@@ -369,9 +369,9 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		textFieldExpenseItemAmount.getDocument().addDocumentListener(btnExpenseEnabler);
 		
 		//ComboBox
-		comboBoxExpenseItemType = new JComboBox<ast.projects.appbudget.models.Type>();
+		comboBoxExpenseItemType = new JComboBox<>();
 		comboBoxExpenseItemType.setName("comboBoxExpenseItemType");
-		comboBoxExpenseItemType.setModel(new DefaultComboBoxModel<ast.projects.appbudget.models.Type>(
+		comboBoxExpenseItemType.setModel(new DefaultComboBoxModel<>(
 				ast.projects.appbudget.models.Type.values()));
 		comboBoxExpenseItemType.setEnabled(false);
 		comboBoxExpenseItemType.setBounds(35, 57, 135, 27);

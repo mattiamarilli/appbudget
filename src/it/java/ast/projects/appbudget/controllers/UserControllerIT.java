@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -101,7 +102,7 @@ public class UserControllerIT {
         userController.deleteUser(userToDelete);
 
         assertThat(userRepository.findAll()).isEmpty();
-        verify(view).refreshUsersList(argThat(users -> users.isEmpty()));
+        verify(view).refreshUsersList(argThat(Collection::isEmpty));
     }
 
     @Test

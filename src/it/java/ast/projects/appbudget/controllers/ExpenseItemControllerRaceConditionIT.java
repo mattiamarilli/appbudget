@@ -107,9 +107,9 @@ public class ExpenseItemControllerRaceConditionIT {
 
 		latch.await();
 		List<ExpenseItem> expenseItemFound = expenseItemRepository.findAll();
-		assertThat(1).isEqualTo(expenseItemFound.size());
-		assertThat("testtitle").isEqualTo(expenseItemFound.get(0).getTitle());
-		assertThat(Type.NEEDS).isEqualTo(expenseItemFound.get(0).getType());
+		assertThat(expenseItemFound.size()).isOne();
+		assertThat(expenseItemFound.get(0).getTitle()).isEqualTo("testtitle");
+		assertThat(expenseItemFound.get(0).getType()).isEqualTo(Type.NEEDS);
 		assertThat(expenseItemFound.get(0).getAmount()).isEqualTo(10.0);
 	}
 	

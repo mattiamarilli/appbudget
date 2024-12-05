@@ -78,6 +78,7 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
             Query<ExpenseItem> query = newSession.createQuery("FROM ExpenseItem", ExpenseItem.class);
             expenseItems = query.list();
         } catch (Exception e) {
+        	expenseItems = null;
             throw e;
         } finally {
             newSession.close();
@@ -95,6 +96,7 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
             query.setParameter("budgetId", budgetId);
             expenseItems = query.list();
         } catch (Exception e) {
+        	expenseItems = null;
             throw e;
         } finally {
             newSession.close();

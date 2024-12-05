@@ -83,6 +83,7 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 	        Query<Budget> query = newSession.createQuery("FROM Budget", Budget.class);
 	        budgets = query.list();
 	    } catch (Exception e) {
+	    	budgets = null;
 	    	throw e;
 	    } finally {
 	        newSession.close();
@@ -100,6 +101,7 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 	        query.setParameter("userId", userId);
 	        budgets = query.list();
 	    } catch (Exception e) {
+	    	budgets = null;
 	        throw e;
 	    } finally {
 	        newSession.close();

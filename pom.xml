@@ -21,9 +21,9 @@
 		
 		
 		<sonar.issue.ignore.multicriteria.e11.resourceKey>
-			**/BudgetAppSwingViewIT*.java
-			**/BudgetSwingAppE2E*.java
-			**/BudgetAppSwingView.java
+			**/BudgetAppSwingViewIT
+			**/BudgetSwingAppE2E
+			**/BudgetAppSwingView
 		</sonar.issue.ignore.multicriteria.e11.resourceKey>
 
 		<!-- Disable rule for: Rename class "BudgetSwingAppE2E" to match the
@@ -45,9 +45,6 @@
 			${project.build.directory}/surefire-reports,
 			${project.build.directory}/failsafe-reports
 		</sonar.junit.reportPaths>
-
-		<!-- Forza il Sonar Scanner a ignorare la cache -->
-		<sonar.scanner.force>true</sonar.scanner.force>
 	</properties>
 
 	<dependencies>

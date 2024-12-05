@@ -1,7 +1,6 @@
 package ast.projects.appbudget.views;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -126,9 +125,8 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		List<Budget> budgets = budgetRepository.findAll();
 		assertThat(budgets.size()).isOne();
 		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
-        assertTrue(budgets.get(0).getIncomes() == 2000);
-        assertTrue(budgets.get(0).getUser().getId() == 1);
-    	
+		assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
+		assertThat(budgets.get(0).getUser().getId()).isOne();
     }
     
     @Test
@@ -187,8 +185,8 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		List<Budget> budgets = budgetRepository.findAll();
 		assertThat(budgets.size()).isOne();
 		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
-        assertTrue(budgets.get(0).getIncomes() == 2000);
-        assertTrue(budgets.get(0).getUser().getId() == 1);
+		assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
+		assertThat(budgets.get(0).getUser().getId()).isOne();
     }
     
     @Test
@@ -222,10 +220,10 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		
 		assertThat(expenseItems.size()).isOne();
 		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitlemod");
-        assertTrue(expenseItems.get(0).getAmount() == 100);
-        assertTrue(expenseItems.get(0).getType() == Type.WANTS);
-        assertTrue(expenseItems.get(0).getBudget().getId() == 1);
-    	
+		
+		assertThat(expenseItems.get(0).getAmount()).isEqualTo(100);
+		assertThat(expenseItems.get(0).getType()).isEqualTo(Type.WANTS);
+		assertThat(expenseItems.get(0).getBudget().getId()).isOne();    	
     }
 
     @Test

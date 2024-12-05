@@ -65,6 +65,7 @@ public class UserRepositorySqlImplementation implements UserRepository {
 	        Query<User> query = newSession.createQuery("FROM User", User.class);
 	        users = query.list();
 	    } catch (Exception e) {
+	    	users = null;
 	    	throw e;
 	    } finally {
 	        newSession.close();
