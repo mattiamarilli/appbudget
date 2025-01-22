@@ -1,7 +1,6 @@
 package ast.projects.appbudget.controllers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.util.List;
@@ -100,7 +99,7 @@ public class BudgetControllerRaceContitionIT {
 			.mapToObj(i -> new Thread(() -> {
 				
 				Budget budget = new Budget("testtitle", 1000);
-				budget.setUser(u);
+				budget.setUserId(u.getId());
 				new BudgetController(view, budgetRepository).addBudget(budget); 
 				latch.countDown();
 			}))
@@ -108,9 +107,10 @@ public class BudgetControllerRaceContitionIT {
 
 		latch.await();
 		List<Budget> budgetFound = budgetRepository.findAll();
-		assertEquals(1, budgetFound.size());
-		assertEquals(budgetFound.get(0).getTitle(), "testtitle");
-		assertTrue(budgetFound.get(0).getIncomes() == 1000);
+		
+		assertThat(budgetFound.size()).isOne();
+		assertThat(budgetFound.get(0).getTitle()).isEqualTo("testtitle");
+		assertThat(budgetFound.get(0).getIncomes()).isEqualTo(1000);
 	}
 	
 	@Test
@@ -139,6 +139,7 @@ public class BudgetControllerRaceContitionIT {
 
 	    latch.await();
 	    Budget updatedBudget = budgetRepository.findAll().get(0);
-	    assertEquals(2000, updatedBudget.getIncomes(), 0.01);
+	    
+	    assertThat(updatedBudget.getIncomes()).isEqualTo(2000);
 	}
 }

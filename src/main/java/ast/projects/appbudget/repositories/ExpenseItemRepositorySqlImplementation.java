@@ -26,78 +26,80 @@ public class ExpenseItemRepositorySqlImplementation implements ExpenseItemReposi
     }
 
     public void save(ExpenseItem expenseItem) {
-        Session session = getSessionFactory().openSession();
-        this.session = session;
+        Session newSession = getSessionFactory().openSession();
+        session = newSession;
         try {
-            session.beginTransaction();
-            session.save(expenseItem);
-            session.getTransaction().commit();
+            newSession.beginTransaction();
+            newSession.save(expenseItem);
+            newSession.getTransaction().commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
+            newSession.getTransaction().rollback();
             throw e;
         } finally {
-            session.close();
+            newSession.close();
         }
     }
 
     public void update(ExpenseItem expenseItem) {
-        Session session = getSessionFactory().openSession();
-        this.session = session;
+        Session newSession = getSessionFactory().openSession();
+        session = newSession;
         try {
-            session.beginTransaction();
-            session.update(expenseItem);
-            session.getTransaction().commit();
+            newSession.beginTransaction();
+            newSession.update(expenseItem);
+            newSession.getTransaction().commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
+            newSession.getTransaction().rollback();
             throw e;
         } finally {
-            session.close();
+            newSession.close();
         }
     }
 
     public void delete(ExpenseItem expenseItem) {
-        Session session = getSessionFactory().openSession();
-        this.session = session;
+        Session newSession = getSessionFactory().openSession();
+        session = newSession;
         try {
-            session.beginTransaction();
-            session.delete(expenseItem);
-            session.getTransaction().commit();
+            newSession.beginTransaction();
+            newSession.delete(expenseItem);
+            newSession.getTransaction().commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
+            newSession.getTransaction().rollback();
             throw e;
         } finally {
-            session.close();
+            newSession.close();
         }
     }
 
     public List<ExpenseItem> findAll() {
-        Session session = getSessionFactory().openSession();
-        this.session = session;
+        Session newSession = getSessionFactory().openSession();
+        session = newSession;
         List<ExpenseItem> expenseItems;
         try {
-            Query<ExpenseItem> query = session.createQuery("FROM ExpenseItem", ExpenseItem.class);
+            Query<ExpenseItem> query = newSession.createQuery("FROM ExpenseItem", ExpenseItem.class);
             expenseItems = query.list();
         } catch (Exception e) {
+        	expenseItems = null;
             throw e;
         } finally {
-            session.close();
+            newSession.close();
         }
         return expenseItems;
     }
     
     @Override
     public List<ExpenseItem> findByBudgetId(long budgetId) {
-        Session session = getSessionFactory().openSession();
-        this.session = session;
+        Session newSession = getSessionFactory().openSession();
+        session = newSession;
         List<ExpenseItem> expenseItems;
         try {
-            Query<ExpenseItem> query = session.createQuery("FROM ExpenseItem e WHERE e.budget.id = :budgetId", ExpenseItem.class);
+            Query<ExpenseItem> query = newSession.createQuery("FROM ExpenseItem e WHERE e.budgetId = :budgetId", ExpenseItem.class);
             query.setParameter("budgetId", budgetId);
             expenseItems = query.list();
         } catch (Exception e) {
+        	expenseItems = null;
             throw e;
         } finally {
-            session.close();
+            newSession.close();
         }
         return expenseItems;
     }

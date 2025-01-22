@@ -28,81 +28,83 @@ public class BudgetRepositorySqlImplementation implements BudgetRepository {
 
 	@Override
 	public void save(Budget budget) {
-	    Session session = getSessionFactory().openSession();
-	    this.session = session;
+	    Session newSession = getSessionFactory().openSession();
+	    session = newSession;
 	    try {
-	        session.beginTransaction();
-	        session.save(budget);
-	        session.getTransaction().commit();
+	        newSession.beginTransaction();
+	        newSession.save(budget);
+	        newSession.getTransaction().commit();
 	    } catch (Exception e) {
-	        session.getTransaction().rollback();
+	        newSession.getTransaction().rollback();
 	        throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	}
 	
 	@Override
 	public void update(Budget budget) {
-	    Session session = getSessionFactory().openSession();
-	    this.session = session;
+	    Session newSession = getSessionFactory().openSession();
+	    session = newSession;
 	    try {
-	        session.beginTransaction();
-	        session.update(budget);
-	        session.getTransaction().commit();
+	        newSession.beginTransaction();
+	        newSession.update(budget);
+	        newSession.getTransaction().commit();
 	    } catch (Exception e) {
-	        session.getTransaction().rollback();
+	        newSession.getTransaction().rollback();
 	        throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	}
 
 	@Override
 	public void delete(Budget budget) {
-	    Session session = getSessionFactory().openSession();
-	    this.session = session;
+	    Session newSession = getSessionFactory().openSession();
+	    session = newSession;
 	    try {
-	        session.beginTransaction();
-	        session.delete(budget);
-	        session.getTransaction().commit();
+	        newSession.beginTransaction();
+	        newSession.delete(budget);
+	        newSession.getTransaction().commit();
 	    } catch (Exception e) {
-	        session.getTransaction().rollback();
+	        newSession.getTransaction().rollback();
 	        throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	}
 
 	@Override
 	public List<Budget> findAll() {
-	    Session session = getSessionFactory().openSession();
-	    this.session = session;
+	    Session newSession = getSessionFactory().openSession();
+	    this.session = newSession;
 	    List<Budget> budgets;
 	    try {
-	        Query<Budget> query = session.createQuery("FROM Budget", Budget.class);
+	        Query<Budget> query = newSession.createQuery("FROM Budget", Budget.class);
 	        budgets = query.list();
 	    } catch (Exception e) {
+	    	budgets = null;
 	    	throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	    return budgets;
 	}
 	
 	@Override
 	public List<Budget> findByUserId(long userId) {
-	    Session session = getSessionFactory().openSession();
-	    this.session = session;
+	    Session newSession = getSessionFactory().openSession();
+	    session = newSession;
 	    List<Budget> budgets;
 	    try {
-	        Query<Budget> query = session.createQuery("FROM Budget b WHERE b.user.id = :userId", Budget.class);
+	        Query<Budget> query = newSession.createQuery("FROM Budget b WHERE b.userId = :userId", Budget.class);
 	        query.setParameter("userId", userId);
 	        budgets = query.list();
 	    } catch (Exception e) {
+	    	budgets = null;
 	        throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	    return budgets;
 	}

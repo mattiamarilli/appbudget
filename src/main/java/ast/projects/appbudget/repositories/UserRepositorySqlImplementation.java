@@ -16,7 +16,6 @@ public class UserRepositorySqlImplementation implements UserRepository {
 	public UserRepositorySqlImplementation(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-    
 	
 	public SessionFactory getSessionFactory() {
 		return this.sessionFactory;
@@ -26,50 +25,50 @@ public class UserRepositorySqlImplementation implements UserRepository {
 		return session;
 	}
 	
-
 	@Override
 	public void save(User user) {
-	    Session session = getSessionFactory().openSession();
-	    this.session = session;
+	    Session newSession = getSessionFactory().openSession();
+	    session = newSession;
 	    try {
-	        session.beginTransaction();
-	        session.save(user);
-	        session.getTransaction().commit();
+	        newSession.beginTransaction();
+	        newSession.save(user);
+	        newSession.getTransaction().commit();
 	    } catch (Exception e) {
-	    	session.getTransaction().rollback();
+	    	newSession.getTransaction().rollback();
 	        throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	}
 	@Override
 	public void delete(User user) {
-		Session session = getSessionFactory().openSession();
-		this.session = session;
+		Session newSession = getSessionFactory().openSession();
+		session = newSession;
 	    try {
-	        session.beginTransaction();
-	        session.delete(user);
-	        session.getTransaction().commit();
+	        newSession.beginTransaction();
+	        newSession.delete(user);
+	        newSession.getTransaction().commit();
 	    } catch (Exception e) {
-	        session.getTransaction().rollback();
+	        newSession.getTransaction().rollback();
 	        throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	}
 
 	@Override
 	public List<User> findAll() {
-		Session session = getSessionFactory().openSession();
-		this.session = session;
+		Session newSession = getSessionFactory().openSession();
+		session = newSession;
 	    List<User> users;
 	    try {
-	        Query<User> query = session.createQuery("FROM User", User.class);
+	        Query<User> query = newSession.createQuery("FROM User", User.class);
 	        users = query.list();
 	    } catch (Exception e) {
+	    	users = null;
 	    	throw e;
 	    } finally {
-	        session.close();
+	        newSession.close();
 	    }
 	    return users;
 	}

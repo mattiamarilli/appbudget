@@ -28,7 +28,7 @@ public class ExpenseItemController {
 	public void addExpenseItem(ExpenseItem expenseItem) {
 		try {
 			expenseItemRepository.save(expenseItem);
-			budgetAppView.refreshExpenseItemsLists(expenseItemRepository.findByBudgetId(expenseItem.getBudget().getId()));
+			budgetAppView.refreshExpenseItemsLists(expenseItemRepository.findByBudgetId(expenseItem.getBudgetId()));
 			budgetAppView.resetExpenseItemErrorMessage();
 			budgetAppView.clearExpenseItemInputs();
 		} catch (Exception e) {
@@ -39,7 +39,7 @@ public class ExpenseItemController {
 	public synchronized void updateExpenseItem(ExpenseItem expenseItem) {
 		try {
 			expenseItemRepository.update(expenseItem);
-			budgetAppView.refreshExpenseItemsLists(expenseItemRepository.findByBudgetId(expenseItem.getBudget().getId()));
+			budgetAppView.refreshExpenseItemsLists(expenseItemRepository.findByBudgetId(expenseItem.getBudgetId()));
 			budgetAppView.resetExpenseItemErrorMessage();
 			budgetAppView.clearExpenseItemInputs();
 		} catch (Exception e) {
@@ -50,7 +50,7 @@ public class ExpenseItemController {
 	public void deleteExpenseItem(ExpenseItem expenseItem) {
 		try {
 			expenseItemRepository.delete(expenseItem);
-			budgetAppView.refreshExpenseItemsLists(expenseItemRepository.findByBudgetId(expenseItem.getBudget().getId()));
+			budgetAppView.refreshExpenseItemsLists(expenseItemRepository.findByBudgetId(expenseItem.getBudgetId()));
 			budgetAppView.resetExpenseItemErrorMessage();
 			budgetAppView.clearExpenseItemInputs();
 		}catch (Exception e) {

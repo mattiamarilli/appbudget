@@ -49,7 +49,7 @@ public class ExpenseItemControllerTest {
     public void testAllExpenseItemsByBudgetSuccess() {
     	Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-        expenseItem.setBudget(budget);
+        expenseItem.setBudgetId(budget.getId());
         List<ExpenseItem> expenseItems = Arrays.asList(expenseItem);
         when(expenseItemRepository.findByBudgetId(budget.getId())).thenReturn(expenseItems);
         expenseItemController.allExpenseItemsByBudget(budget);
@@ -69,7 +69,7 @@ public class ExpenseItemControllerTest {
     public void testAddExpenseItemSuccess() {
         Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-        expenseItem.setBudget(budget);
+        expenseItem.setBudgetId(budget.getId());
 
         when(expenseItemRepository.findByBudgetId(budget.getId()))
             .thenReturn(Arrays.asList(expenseItem));
@@ -97,7 +97,7 @@ public class ExpenseItemControllerTest {
     public void testUpdateExpenseItemSuccess() {
         Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-        expenseItem.setBudget(budget);
+        expenseItem.setBudgetId(budget.getId());
 
         when(expenseItemRepository.findByBudgetId(budget.getId()))
             .thenReturn(Arrays.asList(expenseItem));
@@ -125,7 +125,7 @@ public class ExpenseItemControllerTest {
     public void testDeleteExpenseItemSuccess() {
         Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-        expenseItem.setBudget(budget);
+        expenseItem.setBudgetId(budget.getId());
 
         when(expenseItemRepository.findByBudgetId(budget.getId()))
             .thenReturn(Arrays.asList(expenseItem));

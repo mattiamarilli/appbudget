@@ -102,8 +102,8 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	    ExpenseItem expenseItem1 = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle2", Type.WANTS, 15);
 
-	    expenseItem1.setBudget(budget1);
-	    expenseItem2.setBudget(budget2);
+	    expenseItem1.setBudgetId(budget1.getId());
+	    expenseItem2.setBudgetId(budget2.getId());
 
 	    saveExpenseItemManually(expenseItem1);
 	    saveExpenseItemManually(expenseItem2);
@@ -134,8 +134,9 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	    Budget budget = new Budget("testtitle1", 1000);
 	    saveBudgetManually(budget);
+	    long id = budget.getId();
 
-	    assertThrows(PersistenceException.class, () -> expenseItemRepository.findByBudgetId(budget.getId()));
+	    assertThrows(PersistenceException.class, () -> expenseItemRepository.findByBudgetId(id));
 	    assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
 	}
 
@@ -200,7 +201,7 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	    
 	    ExpenseItem expenseItemToSave = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 	    
-	    expenseItemToSave.setBudget(budget);	
+	    expenseItemToSave.setBudgetId(budget.getId());	
 		
 		ExpenseItem expenseItem = saveExpenseItemManually(expenseItemToSave);
 		

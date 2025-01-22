@@ -29,7 +29,7 @@ public class BudgetController {
 		
 		try {
 			budgetRepository.save(budget);
-			budgetAppView.refreshBudgetsList(budgetRepository.findByUserId(budget.getUser().getId()));
+			budgetAppView.refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
 			budgetAppView.resetBudgetErrorMessage();
 			budgetAppView.clearBudgetInputs();
 		} catch (Exception e) {
@@ -40,7 +40,7 @@ public class BudgetController {
 	public synchronized void updateBudget(Budget budget) {
 		try {
 			budgetRepository.update(budget);
-			budgetAppView.refreshBudgetsList(budgetRepository.findByUserId(budget.getUser().getId()));
+			budgetAppView.refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
 			budgetAppView.resetBudgetErrorMessage();
 			budgetAppView.clearBudgetInputs();
 		} catch (Exception e) {
@@ -51,7 +51,7 @@ public class BudgetController {
 	public void deleteBudget(Budget budget) {
 		try {
 			budgetRepository.delete(budget);
-			budgetAppView.refreshBudgetsList(budgetRepository.findByUserId(budget.getUser().getId()));
+			budgetAppView.refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
 			budgetAppView.resetBudgetErrorMessage();
 			budgetAppView.clearBudgetInputs();
 		}catch (Exception e) {

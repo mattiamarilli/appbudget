@@ -125,9 +125,8 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		List<Budget> budgets = budgetRepository.findAll();
 		assertThat(budgets.size()).isOne();
 		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
-        assertThat(budgets.get(0).getIncomes() == 2000);
-        assertThat(budgets.get(0).getUser().getId() == 1);
-    	
+		assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
+		assertThat(budgets.get(0).getUserId()).isOne();
     }
     
     @Test
@@ -137,7 +136,7 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		Budget budget = new Budget("testtitle", 1000);
 		
 		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -156,9 +155,9 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		
 		assertThat(expenseItems.size()).isOne();
 		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitle");
-        assertThat(expenseItems.get(0).getAmount() == 10);
-        assertThat(expenseItems.get(0).getType() == Type.NEEDS);
-        assertThat(expenseItems.get(0).getBudget().getId() == 1);
+        assertThat(expenseItems.get(0).getAmount()).isEqualTo(10);
+        assertThat(expenseItems.get(0).getType()).isEqualTo(Type.NEEDS);
+        assertThat(expenseItems.get(0).getBudgetId()).isOne();
     	
     }
     
@@ -167,7 +166,7 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     public void testModifyBudget() {
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
 		
 		
@@ -186,22 +185,21 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		List<Budget> budgets = budgetRepository.findAll();
 		assertThat(budgets.size()).isOne();
 		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
-        assertThat(budgets.get(0).getIncomes() == 2000);
-        assertThat(budgets.get(0).getUser().getId() == 1);
+		assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
+		assertThat(budgets.get(0).getUserId()).isOne();
     }
     
     @Test
     public void testModifyExpense() {
     	
-    	User user = new User(1, "testname", "testsurname");
+    	User user = new User("testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
+		budget.setUserId(1);
 		ExpenseItem expense = new ExpenseItem("testtitle1", Type.NEEDS,10);
+		expense.setBudgetId(1);
 
-		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
 		budget.setExpenseItems(Arrays.asList(expense));
-		expense.setBudget(budget);
-
+		user.setBudgets(Arrays.asList(budget));
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -221,10 +219,10 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		
 		assertThat(expenseItems.size()).isOne();
 		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitlemod");
-        assertThat(expenseItems.get(0).getAmount() == 100);
-        assertThat(expenseItems.get(0).getType() == Type.WANTS);
-        assertThat(expenseItems.get(0).getBudget().getId() == 1);
-    	
+		
+		assertThat(expenseItems.get(0).getAmount()).isEqualTo(100);
+		assertThat(expenseItems.get(0).getType()).isEqualTo(Type.WANTS);
+		assertThat(expenseItems.get(0).getBudgetId()).isOne();    	
     }
 
     @Test
@@ -243,7 +241,7 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     	
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
 		
 		
@@ -266,13 +264,12 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     	
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
+		budget.setUserId(1);
 		ExpenseItem expense = new ExpenseItem("testtitle", Type.NEEDS,10);
+		expense.setBudgetId(1);
 		
-		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
 		budget.setExpenseItems(Arrays.asList(expense));
-		expense.setBudget(budget);
-		
+		user.setBudgets(Arrays.asList(budget));
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -286,9 +283,4 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		assertThat(expenseItemRepository.findAll()).isEmpty();
     	
     }
-    
-
-    
-    
-    
 }

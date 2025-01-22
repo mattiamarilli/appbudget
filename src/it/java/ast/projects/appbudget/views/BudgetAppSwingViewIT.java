@@ -116,7 +116,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		User user = new User("testname1","testsurname1");
 		userRepository.save(user);
 		Budget b = new Budget("testtitle",1000);
-		b.setUser(user);
+		b.setUserId(user.getId());
 		budgetRepository.save(b);
 		
 		GuiActionRunner.execute(() -> {
@@ -138,9 +138,9 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		ExpenseItem e2 = new ExpenseItem("testtitle",Type.WANTS,20);
 		ExpenseItem e3 = new ExpenseItem("testtitle",Type.SAVINGS,30);
 		
-		e1.setBudget(b);
-		e2.setBudget(b);
-		e3.setBudget(b);
+		e1.setBudgetId(b.getId());
+		e2.setBudgetId(b.getId());
+		e3.setBudgetId(b.getId());
 		
 		expenseItemRepository.save(e1);
 		expenseItemRepository.save(e2);
@@ -210,7 +210,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
 		
 		
@@ -237,7 +237,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		Budget budget = new Budget("testtitle", 1000);
 		
 		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -272,14 +272,14 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 	@GUITest
 	public void testAddExpenseButtonError() {
 		
-		User user = new User(1, "testname", "testsurname");
+		User user = new User("testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
+		budget.setUserId(1);
 		ExpenseItem expense = new ExpenseItem("testtitle", Type.NEEDS,10);
+		expense.setBudgetId(1);
 		
-		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
 		budget.setExpenseItems(Arrays.asList(expense));
-		expense.setBudget(budget);
+		user.setBudgets(Arrays.asList(budget));
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -303,7 +303,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testModifyBudgetButtonSuccess() {
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
 		
 		
@@ -327,7 +327,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget(1,"testtitle", 1000);
 		Budget budgetFake = new Budget("testtitle", 100);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		
 		GuiActionRunner.execute(() -> {
 			userController.addUser(user);
@@ -354,18 +354,19 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testModifyExpenseButtonSuccess() {
-		User user = new User(1, "testname", "testsurname");
+		User user = new User("testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
+		budget.setUserId(1);
 		ExpenseItem expense1 = new ExpenseItem("testtitle1", Type.NEEDS,10);
+		expense1.setBudgetId(1);
 		ExpenseItem expense2 = new ExpenseItem("testtitle2", Type.WANTS,20);
+		expense2.setBudgetId(1);
 		ExpenseItem expense3 = new ExpenseItem("testtitle3", Type.SAVINGS,30);
+		expense3.setBudgetId(1);	
 
-		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
 		budget.setExpenseItems(Arrays.asList(expense1,expense2,expense3));
-		expense1.setBudget(budget);
-		expense2.setBudget(budget);
-		expense3.setBudget(budget);	
+		user.setBudgets(Arrays.asList(budget));
+		
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -405,8 +406,8 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget(1,"testtitle", 1000);
 		ExpenseItem expense = new ExpenseItem(1,"testtitle", Type.NEEDS,10);
-		budget.setUser(user);
-		expense.setBudget(budget);
+		budget.setUserId(user.getId());
+		expense.setBudgetId(budget.getId());
 		
 		ExpenseItem expenseFake = new ExpenseItem(2,"testtitle", Type.NEEDS,10);
 		
@@ -466,7 +467,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 	public void testDeleteBudgetButtonSuccess() {
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
 		
 		
@@ -488,7 +489,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget(1,"testtitle", 1000);
 		Budget budgetFake = new Budget(2,"testtitle", 100);
-		budget.setUser(user);
+		budget.setUserId(user.getId());
 		
 		GuiActionRunner.execute(() -> {
 			userController.addUser(user);
@@ -513,15 +514,14 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testDeleteButtonExpenseSuccess() {
-		User user = new User(1, "testname", "testsurname");
+		User user = new User("testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
+		budget.setUserId(1);
 		ExpenseItem expense = new ExpenseItem("testtitle", Type.NEEDS,10);
+		expense.setBudgetId(1);
 		
-		user.setBudgets(Arrays.asList(budget));
-		budget.setUser(user);
 		budget.setExpenseItems(Arrays.asList(expense));
-		expense.setBudget(budget);
-		
+		user.setBudgets(Arrays.asList(budget));
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -542,8 +542,8 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget(1,"testtitle", 1000);
 		ExpenseItem expense = new ExpenseItem(1,"testtitle", Type.NEEDS,10);
-		budget.setUser(user);
-		expense.setBudget(budget);
+		budget.setUserId(user.getId());
+		expense.setBudgetId(budget.getId());
 		ExpenseItem expenseFake = new ExpenseItem(2,"testtitle", Type.NEEDS,10);
 		
 		GuiActionRunner.execute(() -> {

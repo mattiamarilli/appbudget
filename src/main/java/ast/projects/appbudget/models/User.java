@@ -26,7 +26,7 @@ public class User {
     @Column(name = "surname", nullable = false, unique = true)
     private String surname;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Budget> budgets;
 
 	public User() {}
@@ -78,6 +78,4 @@ public class User {
 	public void setBudgets(List<Budget> budgets) {
 		this.budgets = budgets;
 	}
-	
-	
 }

@@ -1,11 +1,11 @@
 package ast.projects.appbudget.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -82,7 +82,10 @@ public class UserControllerIT {
     public void testNewUser() {
         userController.addUser(new User("test1name", "test1surname"));
         User user = userRepository.findAll().get(0);
-        assertTrue(user.getName().equals("test1name") && user.getSurname().equals("test1surname"));
+        
+        assertThat(user.getName()).isEqualTo("test1name");
+        assertThat(user.getSurname()).isEqualTo("test1surname");
+        
         verify(view).refreshUsersList(
                 argThat(users -> users.size() == 1 &&
                         users.get(0).getId() == 1 &&
@@ -99,7 +102,7 @@ public class UserControllerIT {
         userController.deleteUser(userToDelete);
 
         assertThat(userRepository.findAll()).isEmpty();
-        verify(view).refreshUsersList(argThat(users -> users.isEmpty()));
+        verify(view).refreshUsersList(argThat(Collection::isEmpty));
     }
 
     @Test

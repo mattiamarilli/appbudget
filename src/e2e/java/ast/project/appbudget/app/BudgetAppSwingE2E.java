@@ -31,7 +31,7 @@ import ast.projects.appbudget.models.Type;
 import ast.projects.appbudget.models.User;
 
 @RunWith(GUITestRunner.class)
-public class BudgetSwingAppE2E extends AssertJSwingJUnitTestCase {
+public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 
 	private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(
 			DockerImageName.parse("mariadb:10.5.5"));
@@ -72,17 +72,17 @@ public class BudgetSwingAppE2E extends AssertJSwingJUnitTestCase {
 		saveUserManually(user2);
 
 		Budget budget1 = new Budget("Maggio 2024", 2000);
-		budget1.setUser(user1);
+		budget1.setUserId(user1.getId());
 		Budget budget2 = new Budget("Giugno 2024", 1000);
-		budget2.setUser(user2);
+		budget2.setUserId(user2.getId());
 
 		saveBudgetManually(budget1);
 		saveBudgetManually(budget2);
 
 		ExpenseItem expense1 = new ExpenseItem("Benzina", Type.NEEDS, 10);
-		expense1.setBudget(budget1);
+		expense1.setBudgetId(budget1.getId());
 		ExpenseItem expense2 = new ExpenseItem("Cinema", Type.WANTS, 20);
-		expense2.setBudget(budget1);
+		expense2.setBudgetId(budget1.getId());
 		
 		saveExpenseItemManually(expense1);
 		saveExpenseItemManually(expense2);

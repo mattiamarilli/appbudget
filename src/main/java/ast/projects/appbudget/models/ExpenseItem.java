@@ -23,9 +23,8 @@ public class ExpenseItem {
     @Enumerated(EnumType.STRING)
     private Type type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "budget_id")
-    private Budget budget;
+    @Column(name = "budget_id")
+    private long budgetId;
 
     public ExpenseItem() {}
 
@@ -74,15 +73,15 @@ public class ExpenseItem {
         this.amount = amount;
     }
 
-    public Budget getBudget() {
-        return budget;
-    }
+    public long getBudgetId() {
+		return budgetId;
+	}
 
-    public void setBudget(Budget budget) {
-        this.budget = budget;
-    }
+	public void setBudgetId(long budgetId) {
+		this.budgetId = budgetId;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return title + " - " + amount + " - " + type;
     }

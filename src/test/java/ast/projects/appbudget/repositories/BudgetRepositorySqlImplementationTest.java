@@ -95,9 +95,9 @@ public class BudgetRepositorySqlImplementationTest {
         User user2 = saveUserManually("testname2", "testsurname2");
 
         Budget budget1 = new Budget("testtitle1", 1000);
-        budget1.setUser(user1);
+        budget1.setUserId(user1.getId());
         Budget budget2 = new Budget("testtitle2", 2000);
-        budget2.setUser(user2);
+        budget2.setUserId(user2.getId());
 
         saveBudgetManually(budget1);
         saveBudgetManually(budget2);
@@ -125,8 +125,9 @@ public class BudgetRepositorySqlImplementationTest {
         deleteBudgetTable();
 
         User user = saveUserManually("Giovanni", "Bianchi");
+        long id = user.getId();
 
-        assertThrows(PersistenceException.class, () -> budgetRepository.findByUserId(user.getId()));
+        assertThrows(PersistenceException.class, () -> budgetRepository.findByUserId(id));
         assertThat(budgetRepository.getSession().isOpen()).isFalse();
     }
 
@@ -181,7 +182,7 @@ public class BudgetRepositorySqlImplementationTest {
     public void testSaveBudgetWhenBudgetIsAlreadyInDB() {
     	User user = saveUserManually("testname1", "testsurname1");
         Budget budgetToSave = new Budget("testtitle1", 1000);
-        budgetToSave.setUser(user);
+        budgetToSave.setUserId(user.getId());
         Budget budget = saveBudgetManually(budgetToSave);
         assertThrows(ConstraintViolationException.class, () -> budgetRepository.save(budget));
         Session session = budgetRepository.getSession();

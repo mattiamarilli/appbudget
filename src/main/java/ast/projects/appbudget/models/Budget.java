@@ -9,8 +9,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -33,12 +31,11 @@ public class Budget {
     @Column(name = "incomes", nullable = false)
     private double incomes;
     
-    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "budgetId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ExpenseItem> expenseItems;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private long userId;
 
 	public Budget() {}
 	
@@ -73,24 +70,20 @@ public class Budget {
 		return incomes;
 	}
 
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
 	public void setIncomes(double incomes) {
 		this.incomes = incomes;
 	}
 
-	public List<ExpenseItem> getExpenseItems() {
-		return expenseItems;
-	}
-
 	public void setExpenseItems(List<ExpenseItem> expenseItems) {
 		this.expenseItems = expenseItems;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
 	}
 
 	@Override

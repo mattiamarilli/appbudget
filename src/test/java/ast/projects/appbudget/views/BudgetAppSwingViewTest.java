@@ -38,7 +38,6 @@ import org.junit.Test;
 @RunWith(GUITestRunner.class)
 public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 
-
 	private FrameFixture window;
 
 	@Mock
@@ -167,6 +166,13 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Add Budget")).requireDisabled();
 		
 		budgetTitleTextBox.setText("");
+		budgetIncomesTextBox.setText("");
+		
+		budgetTitleTextBox.enterText("testtitle");
+		budgetIncomesTextBox.enterText("wrongincomes");
+		window.button(JButtonMatcher.withText("Add Budget")).requireDisabled();
+		
+		budgetTitleTextBox.setText("");
 		budgetIncomesTextBox.enterText("");
 
 		budgetTitleTextBox.enterText("");
@@ -206,6 +212,14 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.textBox("textFieldBudgetTitle").enterText("testtitle");
 		window.textBox("textFieldBudgetIncomes").enterText(" ");
+		window.list("listBudgets").selectItem(0);
+		window.button(JButtonMatcher.withText("Modify Budget")).requireDisabled();
+		
+		window.textBox("textFieldBudgetTitle").setText("");
+		window.textBox("textFieldBudgetIncomes").setText("");
+		
+		window.textBox("textFieldBudgetTitle").enterText("testtitle");
+		window.textBox("textFieldBudgetIncomes").enterText("wrongincomes");
 		window.list("listBudgets").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Budget")).requireDisabled();
 		
@@ -267,6 +281,13 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 
 		expenseItemTitleTextBox.setText("testtitle");
 		expenseItemAmountTextBox.setText("");
+		window.button(JButtonMatcher.withText("Add Expense")).requireDisabled();
+		
+		expenseItemTitleTextBox.setText("");
+		expenseItemAmountTextBox.setText("");
+
+		expenseItemTitleTextBox.setText("testtitle");
+		expenseItemAmountTextBox.setText("wrongamount");
 		window.button(JButtonMatcher.withText("Add Expense")).requireDisabled();
 		
 		expenseItemTitleTextBox.setText("");
@@ -394,6 +415,21 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
 		window.textBox("textFieldExpenseItemAmount").setText("");
+		
+		window.list("listNeeds").selectItem(0);
+		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		window.list("listNeeds").clearSelection();
+		
+		window.list("listWants").selectItem(0);
+		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		window.list("listWants").clearSelection();
+		
+		window.list("listSavings").selectItem(0);
+		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		window.list("listSavings").clearSelection();
+		
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").setText("wrongamount");
 		
 		window.list("listNeeds").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
@@ -551,7 +587,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
-	public void testRefreshExpenseItemsListsShouldAddExpenseItemsToTheCorrectLists() {
+	public void testRefreshExpenseItemsListsShouldAddExpenseItemsToTheCorrectListsAndUpdateInfoLabel() {
 		
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
@@ -560,12 +596,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	    ExpenseItem alreadyExistingExpenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 100);
 	    ExpenseItem alreadyExistingExpenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 100);
 	    
-	    
-	    
 	    GuiActionRunner.execute(() -> {
 	    	budgetAppView.getListNeedsModel().addElement(alreadyExistingExpenseItem1);
 	    	budgetAppView.getListWantsModel().addElement(alreadyExistingExpenseItem2);
 	    	budgetAppView.getListSavingsModel().addElement(alreadyExistingExpenseItem3);
+	    	budgetAppView.setCurrentBudget(new Budget("testbudget",1000));
 	    	
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
 			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
@@ -579,6 +614,13 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	    assertThat(needsListContents).containsExactly(expenseItem1.toString());
 	    assertThat(wantsListContents).containsExactly(expenseItem2.toString());
 	    assertThat(savingsListContents).containsExactly(expenseItem3.toString());
+	    
+	    window.label("labelNeedsInfo").requireText("10.0$ (500.0$)");
+		window.label("lblWantsInfo").requireText("10.0$ (300.0$)");
+		window.label("lblSavingsInfo").requireText("10.0$ (200.0$)");
+		
+	    
+	    
 	}
 	
 	@Test
@@ -697,7 +739,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	public void testBudgetListSelectionOrDeselectionShouldSetUpExpenceItemsLists() {
 		
-		
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -715,7 +756,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.list("listBudgets").selectItem(0);
 
-
 		window.textBox("textFieldExpenseItemTitle").requireEnabled();
 		window.textBox("textFieldExpenseItemAmount").requireEnabled();
 		window.comboBox("comboBoxExpenseItemType").requireEnabled();
@@ -726,18 +766,26 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
 		
+		window.label("labelNeedsInfo").requireText("10.0$ (1000.0$)");
+		window.label("lblWantsInfo").requireText("10.0$ (600.0$)");
+		window.label("lblSavingsInfo").requireText("10.0$ (400.0$)");
+		
 		window.list("listBudgets").clearSelection();
 		
 		String[] listNeedsContents = window.list("listNeeds").contents();
-		assertThat(listNeedsContents).isEmpty();;
+		assertThat(listNeedsContents).isEmpty();
 		String[] listWantsContents = window.list("listWants").contents();
 		assertThat(listWantsContents).isEmpty();
 		String[] listSavingsContents = window.list("listSavings").contents();
-		assertThat(listSavingsContents).isEmpty();;
+		assertThat(listSavingsContents).isEmpty();
 
 		window.textBox("textFieldExpenseItemTitle").requireDisabled();
 		window.textBox("textFieldExpenseItemAmount").requireDisabled();
 		window.comboBox("comboBoxExpenseItemType").requireDisabled();
+		
+		window.label("labelNeedsInfo").requireText("");
+		window.label("lblWantsInfo").requireText("");
+		window.label("lblSavingsInfo").requireText("");
 		
 		window.textBox("textFieldBudgetTitle").requireText("");
 		window.textBox("textFieldBudgetIncomes").requireText("");
@@ -895,7 +943,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 
-		verify(budgetController).allBudgetsByUser(user);;
+		verify(budgetController).allBudgetsByUser(user);
 	}
 	
 	@Test
@@ -963,7 +1011,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 
         assertEquals("testtitle", budgetCaptor.getValue().getTitle());
         assertEquals("2000.0", String.valueOf(budgetCaptor.getValue().getIncomes()));
-        assertEquals(currentUser,budgetCaptor.getValue().getUser());
+        assertEquals(currentUser.getId(),budgetCaptor.getValue().getUserId());
         
 	}
 
@@ -1038,7 +1086,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
         assertEquals("testtitle", expenseItemCaptor.getValue().getTitle());
         assertEquals("10.0", String.valueOf(expenseItemCaptor.getValue().getAmount()));
         assertEquals(Type.NEEDS, expenseItemCaptor.getValue().getType());
-        assertEquals(currentBudget, expenseItemCaptor.getValue().getBudget());
+        assertEquals(currentBudget.getId(), expenseItemCaptor.getValue().getBudgetId());
         
 	}
 

@@ -44,7 +44,7 @@ public class BudgetControllerTest {
     public void testAllBudgetsByUserSuccess() {
     	User user = new User(1, "name", "surname");
         Budget budget = new Budget(1, "testtitle", 1000.0);
-        budget.setUser(user);
+        budget.setUserId(user.getId());
         List<Budget> budgets = Arrays.asList(budget);
         when(budgetRepository.findByUserId(user.getId())).thenReturn(budgets);
         budgetController.allBudgetsByUser(user);
@@ -64,12 +64,12 @@ public class BudgetControllerTest {
     public void testAddBudgetSuccess() {
         User user = new User(1, "name", "surname");
         Budget budget = new Budget(1, "testtitle", 1000.0);
-        budget.setUser(user);
-        when(budgetRepository.findByUserId(budget.getUser().getId())).thenReturn(Arrays.asList(budget));
+        budget.setUserId(user.getId());
+        when(budgetRepository.findByUserId(budget.getUserId())).thenReturn(Arrays.asList(budget));
         budgetController.addBudget(budget);
 
         verify(budgetRepository).save(budget);
-        verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUser().getId()));
+        verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
         verify(budgetAppView).resetBudgetErrorMessage();
         verify(budgetAppView).clearBudgetInputs();
     }
@@ -86,12 +86,12 @@ public class BudgetControllerTest {
     public void testUpdateBudgetSuccess() {
         User user = new User(1, "name", "surname");
         Budget budget = new Budget(1, "testtitle", 1000.0);
-        budget.setUser(user);
-        when(budgetRepository.findByUserId(budget.getUser().getId())).thenReturn(Arrays.asList(budget));
+        budget.setUserId(user.getId());
+        when(budgetRepository.findByUserId(budget.getUserId())).thenReturn(Arrays.asList(budget));
         budgetController.updateBudget(budget);
 
         verify(budgetRepository).update(budget);
-        verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUser().getId()));
+        verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
         verify(budgetAppView).resetBudgetErrorMessage();
         verify(budgetAppView).clearBudgetInputs();
     }
@@ -108,11 +108,11 @@ public class BudgetControllerTest {
     public void testDeleteBudgetSuccess() {
         User user = new User(1, "name", "surname");
         Budget budget = new Budget(1, "testtitle", 1000.0);
-        budget.setUser(user);
-        when(budgetRepository.findByUserId(budget.getUser().getId())).thenReturn(Arrays.asList(budget));
+        budget.setUserId(user.getId());
+        when(budgetRepository.findByUserId(budget.getUserId())).thenReturn(Arrays.asList(budget));
         budgetController.deleteBudget(budget);
         verify(budgetRepository).delete(budget);
-        verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUser().getId()));
+        verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
         verify(budgetAppView).resetBudgetErrorMessage();
         verify(budgetAppView).clearBudgetInputs();
     }

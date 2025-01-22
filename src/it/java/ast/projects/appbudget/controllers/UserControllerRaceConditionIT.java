@@ -1,6 +1,6 @@
 package ast.projects.appbudget.controllers;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.util.List;
@@ -94,8 +94,8 @@ public class UserControllerRaceConditionIT {
 
 		latch.await();
 		List<User> userFound = userRepository.findAll();
-		assertEquals(1, userFound.size());
-		assertEquals(userFound.get(0).getName(), "Mario");
-		assertEquals(userFound.get(0).getSurname(), "Rossi");
+		assertThat(userFound.size()).isOne();
+		assertThat(userFound.get(0).getName()).isEqualTo("Mario");
+		assertThat(userFound.get(0).getSurname()).isEqualTo("Rossi");
 	}
 }

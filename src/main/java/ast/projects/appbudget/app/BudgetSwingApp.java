@@ -72,8 +72,7 @@ public class BudgetSwingApp {
 
             } catch (Exception e) {
             	LogManager.getLogger().debug(e.getStackTrace());
-            }
-            
+            }   
         });
     }
 

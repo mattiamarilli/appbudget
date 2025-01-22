@@ -1,11 +1,11 @@
 package ast.projects.appbudget.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -87,10 +87,11 @@ public class BudgetControllerIT {
     	User u = new User("name","surname");
     	new UserRepositorySqlImplementation(factory).save(u);
     	Budget b = new Budget("testtitle", 2000);
-    	b.setUser(u);
+    	b.setUserId(u.getId());
         budgetController.addBudget(b);
         Budget budget = budgetRepository.findAll().get(0);
-        assertTrue(budget.getTitle().equals("testtitle") && budget.getIncomes() == 2000);
+        assertThat(budget.getTitle()).isEqualTo("testtitle");
+        assertThat(budget.getIncomes()).isEqualTo(2000);
         verify(view).refreshBudgetsList(
                 argThat(budgets -> budgets.size() == 1 &&
                         budgets.get(0).getId() == 1 &&
@@ -104,7 +105,7 @@ public class BudgetControllerIT {
     	User u = new User("name","surname");
     	new UserRepositorySqlImplementation(factory).save(u);
         Budget budgetToUpdate = new Budget("testtitle", 2000);
-        budgetToUpdate.setUser(u);
+        budgetToUpdate.setUserId(u.getId());
         
         budgetController.addBudget(budgetToUpdate);
 
@@ -114,7 +115,10 @@ public class BudgetControllerIT {
         budgetController.updateBudget(budgetToUpdate);
 
         Budget budget = budgetRepository.findAll().get(0);
-        assertTrue(budget.getTitle().equals("testtitle2") && budget.getIncomes() == 1000);
+        
+        assertThat(budget.getTitle()).isEqualTo("testtitle2");
+        assertThat(budget.getIncomes()).isEqualTo(1000);
+        
         verify(view).refreshBudgetsList(
                 argThat(budgets -> budgets.size() == 1 &&
                         budgets.get(0).getId() == 1 &&
@@ -130,12 +134,12 @@ public class BudgetControllerIT {
     	new UserRepositorySqlImplementation(factory).save(u);
         Budget budgetToDelete = new Budget("testtitle", 2000);
         budgetController.addBudget(budgetToDelete);
-        budgetToDelete.setUser(u);
+        budgetToDelete.setUserId(u.getId());
 
         budgetController.deleteBudget(budgetToDelete);
 
         assertThat(budgetRepository.findAll()).isEmpty();
-        verify(view).refreshBudgetsList(argThat(budgets -> budgets.isEmpty()));
+        verify(view).refreshBudgetsList(argThat(Collection::isEmpty));
     }
     
     @Test
@@ -143,7 +147,7 @@ public class BudgetControllerIT {
     	User u = new User("name","surname");
     	userRepository.save(u);
     	Budget b = new Budget("testtitle", 1000);
-    	b.setUser(u);
+    	b.setUserId(u.getId());
         budgetRepository.save(b);
         budgetController.allBudgetsByUser(u);
         verify(view).refreshBudgetsList(

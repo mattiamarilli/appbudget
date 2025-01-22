@@ -1,11 +1,11 @@
 package ast.projects.appbudget.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -87,11 +87,13 @@ public class ExpenseItemControllerIT {
     	Budget b = new Budget("testtitle",100);
         new BudgetRepositorySqlImplementation(factory).save(b);
         ExpenseItem expenseItemToSave = new ExpenseItem("testtitle", Type.NEEDS ,10);
-        expenseItemToSave.setBudget(b);
+        expenseItemToSave.setBudgetId(b.getId());
         expenseItemController.addExpenseItem(expenseItemToSave);
         
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
-        assertTrue(expenseItem.getTitle().equals("testtitle") && expenseItem.getAmount() == 10 && expenseItem.getType() == Type.NEEDS);
+        assertThat(expenseItem.getTitle()).isEqualTo("testtitle");
+        assertThat(expenseItem.getAmount()).isEqualTo(10);
+        assertThat(expenseItem.getType()).isEqualTo(Type.NEEDS);
         verify(view).refreshExpenseItemsLists(
                 argThat(expenseItems -> expenseItems.size() == 1 &&
                 		expenseItems.get(0).getId() == 1 &&
@@ -106,7 +108,7 @@ public class ExpenseItemControllerIT {
     	Budget b = new Budget("testtitle",100);
         new BudgetRepositorySqlImplementation(factory).save(b);
         ExpenseItem expenseToUpdate = new ExpenseItem("testtitle", Type.NEEDS ,10);
-        expenseToUpdate.setBudget(b);
+        expenseToUpdate.setBudgetId(b.getId());
         expenseItemController.addExpenseItem(expenseToUpdate);
 
         expenseToUpdate.setTitle("testtitle2");
@@ -116,7 +118,11 @@ public class ExpenseItemControllerIT {
         expenseItemController.updateExpenseItem(expenseToUpdate);
 
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
-        assertTrue(expenseItem.getTitle().equals("testtitle2") && expenseItem.getAmount() == 20 && expenseItem.getType() == Type.WANTS);
+        
+        assertThat(expenseItem.getTitle()).isEqualTo("testtitle2");
+        assertThat(expenseItem.getAmount()).isEqualTo(20);
+        assertThat(expenseItem.getType()).isEqualTo(Type.WANTS);
+        
         verify(view).refreshExpenseItemsLists(
                 argThat(expenseItems -> expenseItems.size() == 1 &&
                 		expenseItems.get(0).getId() == 1 &&
@@ -131,13 +137,13 @@ public class ExpenseItemControllerIT {
     	Budget b = new Budget("testtitle",100);
         new BudgetRepositorySqlImplementation(factory).save(b);
     	ExpenseItem expenseToDelete = new ExpenseItem("testtitle", Type.NEEDS ,10);
-    	expenseToDelete.setBudget(b);
+    	expenseToDelete.setBudgetId(b.getId());
     	expenseItemController.addExpenseItem(expenseToDelete);
 
     	expenseItemController.deleteExpenseItem(expenseToDelete);
 
         assertThat(expenseItemRepository.findAll()).isEmpty();
-        verify(view).refreshExpenseItemsLists(argThat(expenseItems -> expenseItems.isEmpty()));
+        verify(view).refreshExpenseItemsLists(argThat(Collection::isEmpty));
     }
     
     @Test
@@ -145,7 +151,7 @@ public class ExpenseItemControllerIT {
     	Budget b = new Budget("testtitle", 1000);
     	budgetRepository.save(b);
     	ExpenseItem e = new ExpenseItem("testtitle",Type.NEEDS, 10);
-    	e.setBudget(b);
+    	e.setBudgetId(b.getId());
         expenseItemRepository.save(e);
         expenseItemController.allExpenseItemsByBudget(b);
         verify(view).refreshExpenseItemsLists(
