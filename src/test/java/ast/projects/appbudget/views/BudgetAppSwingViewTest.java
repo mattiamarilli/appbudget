@@ -71,14 +71,10 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	protected void onTearDown() throws Exception {
 		closeable.close();
 	}
-
-	
-	// Initial state 
 	
 	@Test
 	@GUITest
 	public void testControlsInitialStates() {
-		
 		window.label(JLabelMatcher.withText("Name"));
 		window.textBox("textFieldUserName").requireEnabled();
 		window.label(JLabelMatcher.withText("Surname"));
@@ -90,15 +86,14 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.label("lblUserError").requireText("");
 		window.requireTitle("AppBudget");
 	    JFrame frame = (JFrame) window.target();
+	    
 	    assertThat(frame.getDefaultCloseOperation()).isEqualTo(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 	    assertThat(frame.isResizable()).isFalse();
 	}
 
-	// View behavior test
-
 	@Test
+	@GUITest
 	public void testAddButtonShouldBeEnabledOnlyWhenNameAndSurnameAreValid() {
-		
 		JTextComponentFixture nameTextBox = window.textBox("textFieldUserName");
 		JTextComponentFixture surnameTextBox = window.textBox("textFieldUserSurname");
 
@@ -127,6 +122,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testOpenBudgetsAndDeleteUserButtonShouldBeEnabledOnlyWhenAUserIsSelected() {
 		GuiActionRunner
 			.execute(() -> budgetAppView.getListUsersModel().addElement(new User(1, "testname", "testsurname")));
@@ -144,6 +140,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testAddBudgetButtonShouldBeEnabledOnlyWhenTitleAndIncomesAreValid() {
 
 		GuiActionRunner.execute(() -> {
@@ -186,6 +183,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testModifyBudgetButtonShouldBeEnabledOnlyWhenTitleAndIncomesAreValidAndABudgetIsSelected() {
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setExpenseItems(Arrays.asList());
@@ -231,7 +229,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listBudgets").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Budget")).requireEnabled();
 		
-		
 		window.textBox("textFieldBudgetTitle").deleteText();
 		window.textBox("textFieldBudgetIncomes").deleteText();
 		
@@ -239,6 +236,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testDeleteBudgetButtonShouldBeEnabledOnlyWhenABudgetIsSelected() {
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setExpenseItems(Arrays.asList());
@@ -255,10 +253,28 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listBudgets").clearSelection();
 		window.button(JButtonMatcher.withText("Delete Budget")).requireDisabled();
 	}
+	
+	@Test
+	@GUITest
+	public void testBudgetSelectionShouldFillTitleAndIncomesTextBox() {
+		Budget budget = new Budget("testtitle", 1000);
+		budget.setExpenseItems(Arrays.asList());
+		
+		GuiActionRunner.execute(() -> {
+			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+			budgetAppView.getListBudgetsModel().addElement(budget);
+		});
+
+		window.list("listBudgets").selectItem(0);
+
+		window.textBox("textFieldBudgetTitle").requireText("testtitle");
+		window.textBox("textFieldBudgetIncomes").requireText("1000.0");
+	}
 
 	@Test
+	@GUITest
 	public void testAddExpenseButtonShouldBeEnabledOnlyWhenExpenseItemTitleAndAmountAreValid() {
-
 		GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
 			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
@@ -271,7 +287,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		JTextComponentFixture expenseItemTitleTextBox = window.textBox("textFieldExpenseItemTitle");
 		JTextComponentFixture expenseItemAmountTextBox = window.textBox("textFieldExpenseItemAmount");
 
-		
 		expenseItemTitleTextBox.enterText("");
 		expenseItemAmountTextBox.enterText("10");
 		window.button(JButtonMatcher.withText("Add Expense")).requireDisabled();
@@ -297,16 +312,14 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		expenseItemAmountTextBox .enterText("10");
 		window.button(JButtonMatcher.withText("Add Expense")).requireEnabled();
 		
-		
 		expenseItemTitleTextBox.deleteText();
 		expenseItemAmountTextBox.deleteText();
 		
-		window.button(JButtonMatcher.withText("Add Expense")).requireDisabled();
-		
-		
+		window.button(JButtonMatcher.withText("Add Expense")).requireDisabled();	
 	}
 
 	@Test
+	@GUITest
 	public void testDeleteExpenseButtonShouldBeEnabledOnlyWhenAnExpenseIsSelected() {
 	    ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
@@ -335,8 +348,74 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	    window.list("listSavings").clearSelection();
 	    window.button(JButtonMatcher.withText("Delete Expense")).requireDisabled();
 	}
+	
+	@Test
+	@GUITest
+	public void testNeedExpenseSelectionShouldFillTitleAndAmountTextBox() {
+		ExpenseItem expenseItem = new ExpenseItem("testtitle", Type.NEEDS, 10);
+
+	    GuiActionRunner.execute(() -> {
+	        CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+	        cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+	        budgetAppView.getListNeedsModel().addElement(expenseItem);
+	        budgetAppView.getTextFieldExpenseItemTitle().setEnabled(true);
+			budgetAppView.getTextFieldExpenseItemAmount().setEnabled(true);
+			budgetAppView.getComboBoxExpenseItemType().setEnabled(true);
+	    });
+
+	    window.list("listNeeds").selectItem(0);
+	    window.textBox("textFieldExpenseItemTitle").requireText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").requireText("10.0");
+		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
+	    
+	}
+	
+	@Test
+	@GUITest
+	public void testWantsExpenseSelectionShouldFillTitleAndAmountTextBox() {
+	    ExpenseItem expenseItem = new ExpenseItem("testtitle", Type.WANTS, 10);
+
+	    GuiActionRunner.execute(() -> {
+	        CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+	        cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+	        budgetAppView.getListWantsModel().addElement(expenseItem);
+	        budgetAppView.getTextFieldExpenseItemTitle().setEnabled(true);
+			budgetAppView.getTextFieldExpenseItemAmount().setEnabled(true);
+			budgetAppView.getComboBoxExpenseItemType().setEnabled(true);
+	    });
+
+	    window.list("listWants").selectItem(0);
+	    window.textBox("textFieldExpenseItemTitle").requireText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").requireText("10.0");
+		window.comboBox("comboBoxExpenseItemType").requireSelection(1);
+	    
+	}
+
+	
+	@Test
+	@GUITest
+	public void testExpenseSelectionShouldFillTitleAndAmountTextBox() {
+	    ExpenseItem expenseItem = new ExpenseItem("testtitle", Type.SAVINGS, 10);
+
+	    GuiActionRunner.execute(() -> {
+	        CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+	        cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+	        budgetAppView.getListSavingsModel().addElement(expenseItem);
+	        budgetAppView.getTextFieldExpenseItemTitle().setEnabled(true);
+			budgetAppView.getTextFieldExpenseItemAmount().setEnabled(true);
+			budgetAppView.getComboBoxExpenseItemType().setEnabled(true);
+	    });
+	   
+	    window.list("listSavings").selectItem(0);
+	    window.textBox("textFieldExpenseItemTitle").requireText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").requireText("10.0");
+		window.comboBox("comboBoxExpenseItemType").requireSelection(2);
+	    
+	}
+
 
 	@Test
+	@GUITest
 	public void testModifyExpenseButtonShouldBeEnabledOnlyWhenExpenseItemTitleAndAmountAreValidAndAnExpenseIsSelected() {
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
@@ -378,12 +457,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemTitle").deleteText();
 		window.textBox("textFieldExpenseItemAmount").deleteText();
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
-		
 	}
 
 	@Test
+	@GUITest
 	public void testWhenEitherExpenseItemTitleOrAmountAreNotValidOrNoExpenseItemIsSelectedThenModifyExpenseButtonShouldBeDisabled() {
-		
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -446,12 +524,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
 		window.textBox("textFieldExpenseItemAmount").setText("10");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
-
 	}
 	
 	@Test
+	@GUITest
 	public void testSelectANeedsExpenseItemWillDeselectWantsListOrSavingsList() {
-
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -471,12 +548,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listSavings").selectItem(0);
 		window.list("listNeeds").selectItem(0);
 		window.list("listSavings").requireNoSelection();
-
 	}
 
 	@Test
+	@GUITest
 	public void testSelectAWantsExpenseItemWillDeselectNeedsListOrSavingsList() {
-
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -496,12 +572,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listSavings").selectItem(0);
 		window.list("listWants").selectItem(0);
 		window.list("listSavings").requireNoSelection();
-
 	}
 
 	@Test
+	@GUITest
 	public void testSelectASavingExpenseItemWillDeselectNeedsListOrWantsList() {
-
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -521,11 +596,10 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listWants").selectItem(0);
 		window.list("listSavings").selectItem(0);
 		window.list("listWants").requireNoSelection();
-
 	}
 
-	// View methods test
 	@Test
+	@GUITest
 	public void testClearBudgetInputShouldClear() {
 		
 		GuiActionRunner.execute(() -> {
@@ -546,6 +620,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testClearExpenseInputShouldClear() {
 		GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -570,10 +645,14 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
-	public void testRefreshUsersListShouldAddUsersToTheUsersList() {
+	@GUITest
+	public void testRefreshUsersListShouldAddUsersToTheUsersListAndClearTextBox() {
 		User user1 = new User(1, "testname1", "testsurname1");
 		User user2 = new User(2, "testname2", "testsurname2");
 		User alreadyExistingUser = new User("test3name","testsurname3");
+		
+		window.textBox("textFieldUserName").setText("testname");
+		window.textBox("textFieldUserSurname").setText("testsurname");
 
 		GuiActionRunner.execute(() -> {
 			budgetAppView.getListUsersModel().addElement(alreadyExistingUser);
@@ -584,11 +663,13 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		String[] listContents = window.list("listUsers").contents();
 
 		assertThat(listContents).containsExactly(user1.toString(), user2.toString());
+		window.textBox("textFieldUserName").requireText("");
+		window.textBox("textFieldUserSurname").requireText("");
 	}
 	
 	@Test
+	@GUITest
 	public void testRefreshExpenseItemsListsShouldAddExpenseItemsToTheCorrectListsAndUpdateInfoLabel() {
-		
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -615,15 +696,13 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	    assertThat(wantsListContents).containsExactly(expenseItem2.toString());
 	    assertThat(savingsListContents).containsExactly(expenseItem3.toString());
 	    
-	    window.label("labelNeedsInfo").requireText("10.0$ (500.0$)");
-		window.label("lblWantsInfo").requireText("10.0$ (300.0$)");
-		window.label("lblSavingsInfo").requireText("10.0$ (200.0$)");
-		
-	    
-	    
+	    window.label("labelNeedsInfo").requireText("10.0$/500.0$");
+		window.label("lblWantsInfo").requireText("10.0$/300.0$");
+		window.label("lblSavingsInfo").requireText("10.0$/200.0$");
 	}
 	
 	@Test
+	@GUITest
 	public void testRefreshBudgetsListShouldAddBudgetsToTheList() {
 	    Budget budget1 = new Budget("testtitle1", 1000);
 	    Budget budget2 = new Budget("testtitle2", 1000);
@@ -642,31 +721,38 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testShowUserErrorShouldShowTheMessageInTheBudgetErrorLabel() {
 		GuiActionRunner.execute(() -> budgetAppView.showUserErrorMessage("User Error"));
 		window.label("lblUserError").requireText("User Error");
 	}
+	
 	@Test
+	@GUITest
 	public void testShowBudgetErrorShouldShowTheMessageInTheUserErrorLabel() {
 	    GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
 			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
 		});
+	    
 		GuiActionRunner.execute(() -> budgetAppView.showBudgetErrorMessage("Budget Error"));
 		window.label("lblBudgetError").requireText("Budget Error");
 	}
 	
 	@Test
+	@GUITest
 	public void testShowExpenceItemErrorShouldShowTheMessageInTheExpenceItemErrorLabel() {
 	    GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
 			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
 		});
+	    
 		GuiActionRunner.execute(() -> budgetAppView.showExpenseItemErrorMessage("Expence Error"));
 		window.label("lblExpenseError").requireText("Expence Error");
 	}
 
 	@Test
+	@GUITest
 	public void testResetUserErrorMessageShouldResetTheUserErrorLabel() {
 		GuiActionRunner.execute(() -> budgetAppView.getLblErrorMessage().setText("test"));
 		GuiActionRunner.execute(() -> budgetAppView.resetUserErrorMessage());
@@ -674,6 +760,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testResetBudgetErrorMessageShouldResetTheBudgetErrorLabel() {
 	    GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -685,6 +772,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testResetExpenceItemErrorMessageShouldResetTheExpenceItemErrorLabel() {
 	    GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -695,8 +783,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.label("lblExpenseError").requireText("");
 	}
 
-	// Test view methods
 	@Test
+	@GUITest
 	public void testOpenBudgetsButtonShouldInitBudgetsView() {
 		User user = new User("testname", "testsurname");
 
@@ -737,8 +825,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testBudgetListSelectionOrDeselectionShouldSetUpExpenceItemsLists() {
-		
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
@@ -766,9 +854,9 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
 		
-		window.label("labelNeedsInfo").requireText("10.0$ (1000.0$)");
-		window.label("lblWantsInfo").requireText("10.0$ (600.0$)");
-		window.label("lblSavingsInfo").requireText("10.0$ (400.0$)");
+		window.label("labelNeedsInfo").requireText("10.0$/1000.0$");
+		window.label("lblWantsInfo").requireText("10.0$/600.0$");
+		window.label("lblSavingsInfo").requireText("10.0$/400.0$");
 		
 		window.list("listBudgets").clearSelection();
 		
@@ -792,12 +880,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemTitle").requireText("");
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
-
 	}
 	
 	@Test
+	@GUITest
 	public void testBudgetListSelectionOrDeselectionShouldClearAllTextBoxAndCombobox() {
-
 		Budget budget1 = new Budget("testtitle", 2000);
 		Budget budget2 = new Budget("testtitle2", 2000);
 
@@ -840,19 +927,16 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemTitle").requireText("");
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
-
 	}
 
 	@Test
+	@GUITest
 	public void testExitUserShouldResetTheBudgetViewAndComeBackToUserView() {
-		
-		
 		Budget budget = new Budget("testtitle", 2000);	
 		ExpenseItem expenseItem1 = new ExpenseItem("testtitle", Type.NEEDS, 10);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle", Type.WANTS, 10);
 	    ExpenseItem expenseItem3 = new ExpenseItem("testtitle", Type.SAVINGS, 10);
 		
-
 		GuiActionRunner.execute(() -> {
 			budgetAppView.getListBudgetsModel().addElement(budget);
 			budgetAppView.getListNeedsModel().addElement(expenseItem1);
@@ -887,6 +971,9 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Exit user")).click();
 
 		window.panel("panelUsers").requireVisible();
+		
+		window.textBox("textFieldUserName").requireText("");
+		window.textBox("textFieldUserSurname").requireText("");
 
 		GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -923,15 +1010,14 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
 	}
 	
-	
-	// Test button delegation to controller
-	
 	@Test
+	@GUITest
 	public void testSetUserControllerShouldDelegateToUserControllerAllUser() {
 		verify(userController).allUsers();
 	}
 	
 	@Test
+	@GUITest
 	public void testOpenBudgetShouldDelegateToBudgetControllerAllBudgetsByUser() {
 		User user = new User(1, "testname", "testsurname");
 
@@ -947,6 +1033,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testBudgetSelectionShouldDelegateToExpenseItemControllerAllExpenseItemByBudget() {
 		Budget budget = new Budget("testtitle", 2000);
 
@@ -964,6 +1051,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testAddUserButtonShouldDelegateToUserControllerNewUser() {
 		window.textBox("textFieldUserName").enterText("testname");
 		window.textBox("textFieldUserSurname").enterText("testsurname");
@@ -978,6 +1066,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testDeleteUserButtonShouldDelegateToUserControllerDeleteUser() {
 		User user = new User(1, "testname", "testsurname");
 
@@ -993,8 +1082,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testAddBudgetButtonShouldDelegateBudgetControllerNewBudget() {
-		
 		User currentUser = new User(1,"name","surname");
 		GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -1016,6 +1105,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 
 	@Test
+	@GUITest
 	public void testDeleteBudgetButtonShouldDelegateToBudgetControllerDeleteBudget() {
 		Budget budget = new Budget("testtitle", 2000);
 		budget.setExpenseItems(Arrays.asList());
@@ -1035,6 +1125,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testModifyBudgetButtonShouldDelegateToBudgetControllerUpdateBudget() {
 		Budget budget = new Budget("testtitle", 2000);
 		budget.setExpenseItems(Arrays.asList());
@@ -1061,8 +1152,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testAddExpenseButtonShouldDelegateExpenseItemControllerNewExpence() {
-		
 		Budget currentBudget = new Budget(1,"testtitle",1000);
 		
 		GuiActionRunner.execute(() -> {
@@ -1086,11 +1177,11 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
         assertEquals("testtitle", expenseItemCaptor.getValue().getTitle());
         assertEquals("10.0", String.valueOf(expenseItemCaptor.getValue().getAmount()));
         assertEquals(Type.NEEDS, expenseItemCaptor.getValue().getType());
-        assertEquals(currentBudget.getId(), expenseItemCaptor.getValue().getBudgetId());
-        
+        assertEquals(currentBudget.getId(), expenseItemCaptor.getValue().getBudgetId()); 
 	}
 
 	@Test
+	@GUITest
 	public void testDeleteExpenseItemButtonShouldDelegateToExpenseControllerDeleteExpence() {
 		ExpenseItem expenseItem = new ExpenseItem("testtitle", Type.NEEDS, 10);
 
@@ -1112,6 +1203,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	}
 	
 	@Test
+	@GUITest
 	public void testModifyExpenseButtonShouldDelegateToExpenceItemControllerUpdateExpense() {
 		ExpenseItem expenseItem = new ExpenseItem("testtitle", Type.NEEDS, 10);
 		
@@ -1142,5 +1234,4 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
         assertEquals("10.0", String.valueOf(expenseItemCaptor.getValue().getAmount()));
         assertEquals(Type.WANTS, expenseItemCaptor.getValue().getType());
 	}
-
 }

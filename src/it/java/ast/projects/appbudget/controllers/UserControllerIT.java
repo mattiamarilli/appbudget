@@ -29,7 +29,6 @@ public class UserControllerIT {
 
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(
             DockerImageName.parse("mariadb:10.5.5"));
-
     private UserRepositorySqlImplementation userRepository;
 
     @Mock

@@ -88,7 +88,12 @@ public class Budget {
 
 	@Override
     public String toString() {
-        return title + " - " + incomes + "$";
+		if(title != null)
+		{
+			return title + " - " + incomes + "$";
+		}
+		else
+			return "Titol not valid";
     }
     
 

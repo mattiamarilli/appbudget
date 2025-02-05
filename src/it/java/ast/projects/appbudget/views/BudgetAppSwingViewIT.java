@@ -182,14 +182,12 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldUserName").enterText("testname");
 		window.textBox("textFieldUserSurname").enterText("testusername");
 		window.button(JButtonMatcher.withText("Add")).click();
-		
 		window.label("lblUserError").requireText("Error adding new user");
 	}
 	
 	@Test
 	@GUITest
 	public void testAddBudgetButtonSuccess() {
-		
 		User user = new User(1, "testname", "testsurname");
 		
 		GuiActionRunner.execute(() -> {
@@ -207,7 +205,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testAddBudgetButtonError() {
-		
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(user.getId());
@@ -223,16 +220,12 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldBudgetTitle").enterText("testtitle");
 		window.textBox("textFieldBudgetIncomes").enterText("1000");
 		window.button(JButtonMatcher.withText("Add Budget")).click();
-		
 		window.label("lblBudgetError").requireText("Error adding new budget");
-		
-		
 	}
 	
 	@Test
 	@GUITest
 	public void testAddExpenseButtonSuccess() {
-		
 		User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
 		
@@ -262,16 +255,15 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.comboBox("comboBoxExpenseItemType").selectItem(2);
 		window.button(JButtonMatcher.withText("Add Expense")).click();
 		
-		assertThat(window.list("listNeeds").contents()).containsExactly("testtitle" +  " - " + "10.0" + " - " + "NEEDS");
-		assertThat(window.list("listWants").contents()).containsExactly("testtitle" +  " - " + "10.0" + " - " + "WANTS");
-		assertThat(window.list("listSavings").contents()).containsExactly("testtitle" +  " - " + "10.0" + " - " + "SAVINGS");
+		assertThat(window.list("listNeeds").contents()).containsExactly("testtitle" +  " - " + "10.0$" + " - " + "NEEDS");
+		assertThat(window.list("listWants").contents()).containsExactly("testtitle" +  " - " + "10.0$" + " - " + "WANTS");
+		assertThat(window.list("listSavings").contents()).containsExactly("testtitle" +  " - " + "10.0$" + " - " + "SAVINGS");
 
 	}
 	
 	@Test
 	@GUITest
 	public void testAddExpenseButtonError() {
-		
 		User user = new User("testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(1);
@@ -288,12 +280,10 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
-		
 		window.textBox("textFieldExpenseItemTitle").enterText("testtitle");
 		window.textBox("textFieldExpenseItemAmount").enterText("10");
 		window.comboBox("comboBoxExpenseItemType").selectItem(0);
 		window.button(JButtonMatcher.withText("Add Expense")).click();
-		
 		window.label("lblExpenseError").requireText("Error adding expense item");
 
 	}
@@ -305,8 +295,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
-		
-		
+
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
 		});
@@ -316,7 +305,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.list("listBudgets").selectItem(0);
 		window.textBox("textFieldBudgetTitle").enterText("testtitle2");
 		window.textBox("textFieldBudgetIncomes").enterText("2000");
-
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
 		assertThat(window.list("listBudgets").contents()).containsExactly("testtitle2" + " - " + "2000.0" + "$");
 	}
@@ -332,7 +320,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		GuiActionRunner.execute(() -> {
 			userController.addUser(user);
 		});
-		
 
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
@@ -345,9 +332,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.list("listBudgets").selectItem(0);
 		window.textBox("textFieldBudgetTitle").enterText("testtitle2");
 		window.textBox("textFieldBudgetIncomes").enterText("2000");
-
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
-
 		window.label("lblBudgetError").requireText("Error updating budget");
 	}
 	
@@ -366,7 +351,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 
 		budget.setExpenseItems(Arrays.asList(expense1,expense2,expense3));
 		user.setBudgets(Arrays.asList(budget));
-		
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -394,10 +378,9 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.comboBox("comboBoxExpenseItemType").selectItem(2);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 		
-		assertThat(window.list("listNeeds").contents()).containsExactly("testtitle1mod" +  " - " + "100.0" + " - " + "NEEDS");
-		assertThat(window.list("listWants").contents()).containsExactly("testtitle2mod" +  " - " + "100.0" + " - " + "WANTS");
-		assertThat(window.list("listSavings").contents()).containsExactly("testtitle3mod" +  " - " + "100.0" + " - " + "SAVINGS");
-		
+		assertThat(window.list("listNeeds").contents()).containsExactly("testtitle1mod" +  " - " + "100.0$" + " - " + "NEEDS");
+		assertThat(window.list("listWants").contents()).containsExactly("testtitle2mod" +  " - " + "100.0$" + " - " + "WANTS");
+		assertThat(window.list("listSavings").contents()).containsExactly("testtitle3mod" +  " - " + "100.0$" + " - " + "SAVINGS");
 	}
 
 	@Test
@@ -411,14 +394,12 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		
 		ExpenseItem expenseFake = new ExpenseItem(2,"testtitle", Type.NEEDS,10);
 		
-		
 		GuiActionRunner.execute(() -> {
 			userController.addUser(user);
 			budgetController.addBudget(budget);
 			expenseItemController.addExpenseItem(expense);
 		});
 		
-
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
@@ -433,10 +414,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemAmount").enterText("100");
 		window.comboBox("comboBoxExpenseItemType").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
-
 		window.label("lblExpenseError").requireText("Error updating expense item");
-
-
 	}
 	
 	@Test
@@ -456,9 +434,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 
 		window.list().selectItem(0);
 		window.button(JButtonMatcher.withText("Delete User")).click();
-
 		assertThat(window.list().contents()).containsExactly(user.toString());
-
 		window.label("lblUserError").requireText("Error deleting user");
 	}
 	
@@ -469,7 +445,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
-		
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -496,7 +471,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 			budgetController.addBudget(budget);
 		});
 		
-
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		
@@ -507,7 +481,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 
 		window.list("listBudgets").selectItem(1);
 		window.button(JButtonMatcher.withText("Delete Budget")).click();
-
 		window.label("lblBudgetError").requireText("Error deleting budget");
 	}
 	
@@ -533,7 +506,6 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.list("listNeeds").selectItem(0);
 		window.button(JButtonMatcher.withText("Delete Expense")).click();
 		assertThat(window.list("listNeeds").contents()).isEmpty();
-
 	}
 
 	@Test
@@ -561,10 +533,7 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		});
 		window.list("listNeeds").selectItem(1);
 		window.button(JButtonMatcher.withText("Delete Expense")).click();
-
 		window.label("lblExpenseError").requireText("Error deleting expense item");
-
-
 	}
 	
 }

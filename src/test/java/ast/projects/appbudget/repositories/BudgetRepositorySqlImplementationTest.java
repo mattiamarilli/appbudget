@@ -52,7 +52,7 @@ public class BudgetRepositorySqlImplementationTest {
             sessionFactory.close();
         }
     }
-
+    
     private void deleteBudgetTable() {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
@@ -93,12 +93,10 @@ public class BudgetRepositorySqlImplementationTest {
     public void testFindByUserId() {
         User user1 = saveUserManually("testname1", "testsurname1");
         User user2 = saveUserManually("testname2", "testsurname2");
-
         Budget budget1 = new Budget("testtitle1", 1000);
         budget1.setUserId(user1.getId());
         Budget budget2 = new Budget("testtitle2", 2000);
         budget2.setUserId(user2.getId());
-
         saveBudgetManually(budget1);
         saveBudgetManually(budget2);
 
@@ -168,7 +166,6 @@ public class BudgetRepositorySqlImplementationTest {
 
         budgetRepository.save(budget);
         List<Budget> budgets = getBudgetsFromDatabaseManually();
-
         Session session = budgetRepository.getSession();
 
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
@@ -184,8 +181,10 @@ public class BudgetRepositorySqlImplementationTest {
         Budget budgetToSave = new Budget("testtitle1", 1000);
         budgetToSave.setUserId(user.getId());
         Budget budget = saveBudgetManually(budgetToSave);
+        
         assertThrows(ConstraintViolationException.class, () -> budgetRepository.save(budget));
         Session session = budgetRepository.getSession();
+        
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
         assertThat(session.isOpen()).isFalse();
         assertThat(getBudgetsFromDatabaseManually()).hasSize(1);
@@ -208,8 +207,10 @@ public class BudgetRepositorySqlImplementationTest {
     public void testDeleteBudgetThatIsNotInDB() {
         Budget budget = new Budget("testtitle1", 1000);
         budget.setId(1);
+        
         assertThrows(OptimisticLockException.class, () -> budgetRepository.delete(budget));
         Session session = budgetRepository.getSession();
+        
         assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
     }
@@ -219,9 +220,9 @@ public class BudgetRepositorySqlImplementationTest {
         Budget budget = saveBudgetManually(new Budget("testtitle1", 1000));
         budget.setTitle("testtitle2");
         budget.setIncomes(2000);
+        
         budgetRepository.update(budget);
         List<Budget> budgets = getBudgetsFromDatabaseManually();
-
         Session session = budgetRepository.getSession();
 
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
@@ -234,8 +235,10 @@ public class BudgetRepositorySqlImplementationTest {
     public void testUpdateBudgetThatIsNotInDB() {
         Budget budget = new Budget("testtitle1", 1000);
         budget.setId(1);
+        
         assertThrows(OptimisticLockException.class, () -> budgetRepository.update(budget));
         Session session = budgetRepository.getSession();
+        
         assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
     }

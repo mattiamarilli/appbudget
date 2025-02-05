@@ -39,7 +39,6 @@ public class BudgetControllerTest {
         closeable.close();
     }
     
-    
     @Test
     public void testAllBudgetsByUserSuccess() {
     	User user = new User(1, "name", "surname");
@@ -47,7 +46,9 @@ public class BudgetControllerTest {
         budget.setUserId(user.getId());
         List<Budget> budgets = Arrays.asList(budget);
         when(budgetRepository.findByUserId(user.getId())).thenReturn(budgets);
+        
         budgetController.allBudgetsByUser(user);
+        
         verify(budgetAppView).refreshBudgetsList(budgets);
         verify(budgetAppView).resetBudgetErrorMessage();
     }
@@ -56,7 +57,9 @@ public class BudgetControllerTest {
     public void testAllBudgetsFailure() {
     	User user = new User(1, "name", "surname");
         doThrow(new RuntimeException()).when(budgetRepository).findByUserId(1);
+        
         budgetController.allBudgetsByUser(user);
+        
         verify(budgetAppView).showBudgetErrorMessage("Error fetching budgets");
     }
 
@@ -66,6 +69,7 @@ public class BudgetControllerTest {
         Budget budget = new Budget(1, "testtitle", 1000.0);
         budget.setUserId(user.getId());
         when(budgetRepository.findByUserId(budget.getUserId())).thenReturn(Arrays.asList(budget));
+        
         budgetController.addBudget(budget);
 
         verify(budgetRepository).save(budget);
@@ -78,7 +82,9 @@ public class BudgetControllerTest {
     public void testAddBudgetFailure() {
         Budget budget = new Budget("testtitle", 1000.0);
         doThrow(new RuntimeException()).when(budgetRepository).save(any(Budget.class));
+        
         budgetController.addBudget(budget);
+        
         verify(budgetAppView).showBudgetErrorMessage("Error adding new budget");
     }
 
@@ -88,6 +94,7 @@ public class BudgetControllerTest {
         Budget budget = new Budget(1, "testtitle", 1000.0);
         budget.setUserId(user.getId());
         when(budgetRepository.findByUserId(budget.getUserId())).thenReturn(Arrays.asList(budget));
+        
         budgetController.updateBudget(budget);
 
         verify(budgetRepository).update(budget);
@@ -100,7 +107,9 @@ public class BudgetControllerTest {
     public void testUpdateBudgetFailure() {
         Budget budget = new Budget("testtitle", 1000.0);
         doThrow(new RuntimeException()).when(budgetRepository).update(any(Budget.class));
+        
         budgetController.updateBudget(budget);
+        
         verify(budgetAppView).showBudgetErrorMessage("Error updating budget");
     }
 
@@ -110,7 +119,9 @@ public class BudgetControllerTest {
         Budget budget = new Budget(1, "testtitle", 1000.0);
         budget.setUserId(user.getId());
         when(budgetRepository.findByUserId(budget.getUserId())).thenReturn(Arrays.asList(budget));
+        
         budgetController.deleteBudget(budget);
+        
         verify(budgetRepository).delete(budget);
         verify(budgetAppView).refreshBudgetsList(budgetRepository.findByUserId(budget.getUserId()));
         verify(budgetAppView).resetBudgetErrorMessage();
@@ -121,7 +132,9 @@ public class BudgetControllerTest {
     public void testDeleteBudgetFailure() {
         Budget budget = new Budget("testtitle", 1000.0);
         doThrow(new RuntimeException()).when(budgetRepository).delete(any(Budget.class));
+        
         budgetController.deleteBudget(budget);
+        
         verify(budgetAppView).showBudgetErrorMessage("Error deleting budget");
     }
 }

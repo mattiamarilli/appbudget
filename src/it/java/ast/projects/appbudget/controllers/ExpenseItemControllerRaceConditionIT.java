@@ -30,17 +30,7 @@ import ast.projects.appbudget.views.BudgetAppView;
 public class ExpenseItemControllerRaceConditionIT {
 
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.5.5"));
-    
     private ExpenseItemRepositorySqlImplementation expenseItemRepository;
-    
-    private static final String JDBC_PREFIX = "jdbc:";
-    private static final String JDBC_URL_FORMAT = "jdbc:mariadb://%s:%s/appbudget";
-    private static final String HIBERNATE_DIALECT = "org.hibernate.dialect.MariaDBDialect";
-    private static final String HIBERNATE_USERNAME = "testuser";
-    private static final String HIBERNATE_PASSWORD = "testpassword";
-    private static final String HIBERNATE_HBM2DDL_AUTO = "create-drop";
-    private static final String HIBERNATE_SHOW_SQL = "true";
-    private static final String INIT_SCRIPT = "initializer.sql";
     
     @Mock
     private BudgetAppView view;
@@ -53,21 +43,21 @@ public class ExpenseItemControllerRaceConditionIT {
     
     @ClassRule
     public static final MariaDBContainer<?> mariaDB = MARIA_DB_CONTAINER.withUsername("root").withPassword("")
-            .withInitScript(INIT_SCRIPT);
+            .withInitScript("initializer.sql");
 
     @Before
     public void setupRepo() {
     	closeable = MockitoAnnotations.openMocks(this);
         mariaDB.start();
         String jdbcUrl = mariaDB.getJdbcUrl();
-        URI uri = URI.create(jdbcUrl.replace(JDBC_PREFIX, ""));
+        URI uri = URI.create(jdbcUrl.replace("jdbc:", ""));
         factory = new Configuration()
-                .setProperty("hibernate.dialect", HIBERNATE_DIALECT)
-                .setProperty("hibernate.connection.url", String.format(JDBC_URL_FORMAT, uri.getHost(), uri.getPort()))
-                .setProperty("hibernate.connection.username", HIBERNATE_USERNAME)
-                .setProperty("hibernate.connection.password", HIBERNATE_PASSWORD)
-                .setProperty("hibernate.hbm2ddl.auto", HIBERNATE_HBM2DDL_AUTO)
-                .setProperty("hibernate.show_sql", HIBERNATE_SHOW_SQL)
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect")
+                .setProperty("hibernate.connection.url", String.format("jdbc:mariadb://%s:%s/appbudget", uri.getHost(), uri.getPort()))
+                .setProperty("hibernate.connection.username", "testuser")
+                .setProperty("hibernate.connection.password", "testpassword")
+                .setProperty("hibernate.hbm2ddl.auto", "create-drop")
+                .setProperty("hibernate.show_sql", "true")
                 .addAnnotatedClass(User.class)
                 .addAnnotatedClass(Budget.class)
                 .addAnnotatedClass(ExpenseItem.class)
@@ -90,7 +80,6 @@ public class ExpenseItemControllerRaceConditionIT {
 	@Test
 	public void testNewExpense() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(10);
-		
 		Budget b = new Budget(1,"title", 1000);
 		new BudgetRepositorySqlImplementation(factory).save(b);
 
@@ -117,7 +106,6 @@ public class ExpenseItemControllerRaceConditionIT {
 	public void testUpdateExpenseItem() throws InterruptedException {
 		ExpenseItem expenseItem = new ExpenseItem("testtitle",Type.NEEDS, 10);
 		expenseItemRepository.save(expenseItem);
-
 	    CountDownLatch latch = new CountDownLatch(10);
 
 	    for (int i = 0; i < 10; i++) {

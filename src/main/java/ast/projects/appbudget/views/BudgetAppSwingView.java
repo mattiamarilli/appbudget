@@ -32,6 +32,11 @@ import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import ast.project.appbudget.utils.TextFieldsValidatorUtils;
 
+/**
+ * This class represents the Swing-based graphical user interface (GUI) for the budget application. 
+ * It extends JFrame to provide a window for the application and implements the BudgetAppView interface 
+ * to define the methods for interacting with the application's data and displaying information to the user.
+ */
 public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 
 	private static final long serialVersionUID = 1L;
@@ -105,6 +110,14 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	// Combobox
 	private JComboBox<ast.projects.appbudget.models.Type> comboBoxExpenseItemType;
 
+	/**
+	 * Default constructor for BudgetAppSwingView. 
+	 * 
+	 * This constructor initializes the GUI components of the application, 
+	 * such as panels, buttons, text fields, and tables, and sets up the initial layout 
+	 * and appearance of the application window. 
+	 * Establish event listeners for user interactions with the GUI elements.
+	 */
 
 	public BudgetAppSwingView() {
 		super.setTitle("AppBudget");
@@ -229,29 +242,29 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		lblExpenseError.setBounds(0, 124, 443, 16);
 		panelExpenseForm.add(lblExpenseError);
 		
-		labelNeedsInfo = new JLabel("New label");
+		labelNeedsInfo = new JLabel("");
 		labelNeedsInfo.setName("labelNeedsInfo");
-		GridBagConstraints gbc_labelNeedsInfo = new GridBagConstraints();
-		gbc_labelNeedsInfo.insets = new Insets(0, 0, 5, 5);
-		gbc_labelNeedsInfo.gridx = 3;
-		gbc_labelNeedsInfo.gridy = 0;
-		panelBudgets.add(labelNeedsInfo, gbc_labelNeedsInfo);
+		GridBagConstraints gbcLabelNeedsInfo = new GridBagConstraints();
+		gbcLabelNeedsInfo.insets = new Insets(0, 0, 5, 5);
+		gbcLabelNeedsInfo.gridx = 3;
+		gbcLabelNeedsInfo.gridy = 0;
+		panelBudgets.add(labelNeedsInfo, gbcLabelNeedsInfo);
 		
-		lblWantsInfo = new JLabel("New label");
+		lblWantsInfo = new JLabel("");
 		lblWantsInfo.setName("lblWantsInfo");
-		GridBagConstraints gbc_lblWantsInfo = new GridBagConstraints();
-		gbc_lblWantsInfo.insets = new Insets(0, 0, 5, 5);
-		gbc_lblWantsInfo.gridx = 4;
-		gbc_lblWantsInfo.gridy = 0;
-		panelBudgets.add(lblWantsInfo, gbc_lblWantsInfo);
+		GridBagConstraints gbcLblWantsInfo = new GridBagConstraints();
+		gbcLblWantsInfo.insets = new Insets(0, 0, 5, 5);
+		gbcLblWantsInfo.gridx = 4;
+		gbcLblWantsInfo.gridy = 0;
+		panelBudgets.add(lblWantsInfo, gbcLblWantsInfo);
 		
-		lblSavingsInfo = new JLabel("New label");
+		lblSavingsInfo = new JLabel("");
 		lblSavingsInfo.setName("lblSavingsInfo");
-		GridBagConstraints gbc_lblSavingsInfo = new GridBagConstraints();
-		gbc_lblSavingsInfo.insets = new Insets(0, 0, 5, 0);
-		gbc_lblSavingsInfo.gridx = 5;
-		gbc_lblSavingsInfo.gridy = 0;
-		panelBudgets.add(lblSavingsInfo, gbc_lblSavingsInfo);
+		GridBagConstraints gbcLblSavingsInfo = new GridBagConstraints();
+		gbcLblSavingsInfo.insets = new Insets(0, 0, 5, 0);
+		gbcLblSavingsInfo.gridx = 5;
+		gbcLblSavingsInfo.gridy = 0;
+		panelBudgets.add(lblSavingsInfo, gbcLblSavingsInfo);
 		
 		//Text fields
 		// DocumentListener for enabling btnUserAdd
@@ -558,7 +571,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 					);
 			
 			currentBudget = listBudgets.getSelectedValue();
-
+			
 			btnBudgetDelete.setEnabled(listBudgets.getSelectedIndex() != -1);
 			openBudget(listBudgets.getSelectedValue());
 			}
@@ -577,6 +590,13 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 			listSavings.clearSelection();
 
 			currentExpenseItem = listNeeds.getSelectedValue();
+			
+			if(currentExpenseItem != null)
+			{
+				textFieldExpenseItemTitle.setText(currentExpenseItem.getTitle());
+				textFieldExpenseItemAmount.setText(String.valueOf(currentExpenseItem.getAmount()));
+				comboBoxExpenseItemType.setSelectedIndex(0);
+			}
 
 			btnModifyExpenseEnabler();
 			btnExpenseDelete.setEnabled(listNeeds.getSelectedIndex() != -1);
@@ -595,6 +615,13 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 			listSavings.clearSelection();
 
 			currentExpenseItem = listWants.getSelectedValue();
+			
+			if(currentExpenseItem != null)
+			{
+				textFieldExpenseItemTitle.setText(currentExpenseItem.getTitle());
+				textFieldExpenseItemAmount.setText(String.valueOf(currentExpenseItem.getAmount()));
+				comboBoxExpenseItemType.setSelectedIndex(1);
+			}
 
 			btnModifyExpenseEnabler();
 			btnExpenseDelete.setEnabled(listWants.getSelectedIndex() != -1);
@@ -614,7 +641,14 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 			listWants.clearSelection();
 
 			currentExpenseItem = listSavings.getSelectedValue();
-
+			
+			if(currentExpenseItem != null)
+			{
+				textFieldExpenseItemTitle.setText(currentExpenseItem.getTitle());
+				textFieldExpenseItemAmount.setText(String.valueOf(currentExpenseItem.getAmount()));
+				comboBoxExpenseItemType.setSelectedIndex(2);
+			}
+			
 			btnModifyExpenseEnabler();
 			btnExpenseDelete.setEnabled(listSavings.getSelectedIndex() != -1);
 		});
@@ -635,7 +669,6 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	}
 
 	// Package private getter for testing purpose
-	
 	JLabel getLblErrorMessage() {
 		return lblUserError;
 	}
@@ -718,38 +751,71 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	
 	//View methods implementation
 
+	/**
+	 * Updates the user list in the view with the provided list of users.
+	 * 
+	 * @param users The list of users to be displayed.
+	 */
 	@Override
 	public void refreshUsersList(List<User> users) {
+		textFieldUserName.setText("");
+		textFieldUserSurname.setText("");
 		listUsersModel.clear();
 		users.forEach(listUsersModel::addElement);
 	}
 
+	/**
+	 * Displays an error message related to users.
+	 * 
+	 * @param message The error message to be shown.
+	 */
 	@Override
 	public void showUserErrorMessage(String message) {
 		lblUserError.setText(message);
 	}
 
+	/**
+	 * Clears any previously displayed error messages related to users.
+	 */
 	@Override
 	public void resetUserErrorMessage() {
 		lblUserError.setText("");
 	}
 
+	/**
+	 * Updates the budget list in the view with the provided list of budgets.
+	 * 
+	 * @param budgets The list of budgets to be displayed.
+	 */
 	@Override
 	public void refreshBudgetsList(List<Budget> budgets) {
 		listBudgetsModel.clear();
 		budgets.forEach(listBudgetsModel::addElement);
 	}
 
+	/**
+	 * Displays an error message related to budgets.
+	 * 
+	 * @param message The error message to be shown.
+	 */
 	@Override
 	public void showBudgetErrorMessage(String message) {
 		lblBudgetError.setText(message);
 	}
 
+	/**
+	 * Clears any previously displayed error messages related to budgets.
+	 */
 	@Override
 	public void resetBudgetErrorMessage() {
 		lblBudgetError.setText("");
 	}
 
+	/**
+	 * Updates the expense item lists (Needs, Wants, Savings) in the view with the provided list of expense items.
+	 * 
+	 * @param expenseItems The list of expense items to be displayed.
+	 */
 	@Override
 	public void refreshExpenseItemsLists(List<ExpenseItem> expenseItems) {
 		listNeedsModel.clear();
@@ -765,25 +831,38 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		
 		updateInfoLabel(currentBudget);
 		
-		
 	}
 
+	/**
+	 * Displays an error message related to expense items.
+	 * 
+	 * @param message The error message to be displayed.
+	 */
 	@Override
 	public void showExpenseItemErrorMessage(String message) {
 		lblExpenseError.setText(message);
 	}
 
+	/**
+	 * Clears any previously displayed error messages related to expense items.
+	 */
 	@Override
 	public void resetExpenseItemErrorMessage() {
 		lblExpenseError.setText("");
 	}
 	
+	/**
+	 * Clears the input fields used for entering budget information.
+	 */
 	@Override
 	public void clearBudgetInputs() {
 		textFieldBudgetTitle.setText("");
 		textFieldBudgetIncomes.setText("");
 	}
 
+	/**
+	 * Clears the input fields used for entering expense item information.
+	 */
 	@Override
 	public void clearExpenseItemInputs() {
 		textFieldExpenseItemTitle.setText("");
@@ -793,13 +872,22 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	
 	//Private methods for managing user behavior
 	
+	/**
+	 * Enables the "Modify Expense" button only if an expense item is selected, 
+	 * and both the title and amount fields contain valid input.
+	 */
 	private void btnModifyExpenseEnabler() {
 		btnExpenseModify.setEnabled((listSavings.getSelectedIndex() != -1 || listWants.getSelectedIndex() != -1
 				|| listNeeds.getSelectedIndex() != -1)
 				&& TextFieldsValidatorUtils.validateExpenseItemTitleTextField(textFieldExpenseItemTitle.getText())
 				&& TextFieldsValidatorUtils.validateExpenseItemAmountTextField(textFieldExpenseItemAmount.getText()));
 	}
-
+	
+	/**
+	 * Displays the user's budgets and updates the view with user information.
+	 * 
+	 * @param user The user object representing the currently logged-in user.
+	 */
 	private void openUserBudgets(User user) {
 		lblUserDetails.setText("Current user: " + user.toString());
 		CardLayout cardLayout = (CardLayout) contentPane.getLayout();
@@ -807,7 +895,13 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		budgetController.allBudgetsByUser(user);
 	}
 	
-	private void updateInfoLabel(Budget b) {
+	/**
+	 * Calculates and displays the total expenses for Needs, Wants, and Savings categories.
+	 * Also displays the recommended budget allocation based on the given budget's income.
+	 *
+	 * @param budget The budget object containing income information.
+	 */
+	private void updateInfoLabel(Budget budget) {
 		
 		double sumNeeds = 0;
 		double sumWants = 0;
@@ -818,22 +912,28 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 			sumNeeds+=expenseItem.getAmount();
 		}
 		
-		List<ExpenseItem> wants = Collections.list(listNeedsModel.elements());
+		List<ExpenseItem> wants = Collections.list(listWantsModel.elements());
 		for (ExpenseItem expenseItem : wants) {
 			sumWants+=expenseItem.getAmount();
 		}
 		
-		List<ExpenseItem> savings = Collections.list(listNeedsModel.elements());
+		List<ExpenseItem> savings = Collections.list(listSavingsModel.elements());
 		for (ExpenseItem expenseItem : savings) {
 			sumSavings+=expenseItem.getAmount();
 		}
 		
-		labelNeedsInfo.setText(sumNeeds + "$ (" + b.getIncomes()*0.5 + "$)");
-		lblWantsInfo.setText(sumWants + "$ (" + b.getIncomes()*0.3 + "$)");
-		lblSavingsInfo.setText(sumSavings + "$ (" + b.getIncomes()*0.2 + "$)");
+		labelNeedsInfo.setText((Math.round(sumNeeds * 100.0) / 100.0) + "$/" + (Math.round(budget.getIncomes()*0.5 * 100.0) / 100.0) + "$");
+		lblWantsInfo.setText((Math.round(sumWants * 100.0) / 100.0) + "$/" + (Math.round(budget.getIncomes()*0.3 * 100.0) / 100.0) + "$");
+		lblSavingsInfo.setText((Math.round(sumSavings * 100.0) / 100.0) + "$/" + (Math.round(budget.getIncomes()*0.2 * 100.0) / 100.0) + "$");
 
 	}
 
+	/**
+	 * Displays expense items for a given budget and updates the view with budget information.
+	 * Handles the case where no budget is selected by clearing relevant data.
+	 * 
+	 * @param budget The budget selected by the user. If `null`, the user interface is reset.
+	 */
 	private void openBudget(Budget budget) {
 
 		if (budget != null) {			
@@ -843,8 +943,8 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 			textFieldExpenseItemAmount.setEnabled(true);
 			comboBoxExpenseItemType.setEnabled(true);
 			
-			textFieldBudgetTitle.setText("");
-			textFieldBudgetIncomes.setText("");
+			textFieldBudgetTitle.setText(currentBudget.getTitle());
+			textFieldBudgetIncomes.setText(String.valueOf(currentBudget.getIncomes()));
 			textFieldExpenseItemTitle.setText("");
 			textFieldExpenseItemAmount.setText("");
 			comboBoxExpenseItemType.setSelectedIndex(0);
@@ -869,6 +969,11 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		}
 
 	}
+	
+	/**
+	 * Resets the application view to its initial state after a user logs out.
+	 * Clears data displays, disables buttons, and resets text fields.
+	 */
 
 	private void exitUser() {
 
@@ -898,10 +1003,12 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		this.textFieldExpenseItemTitle.setEnabled(false);
 		this.textFieldExpenseItemAmount.setEnabled(false);
 		this.comboBoxExpenseItemType.setEnabled(false);
+		
+		this.textFieldUserName.setText("");
+		this.textFieldUserSurname.setText("");
 
 		CardLayout cardLayout = (CardLayout) contentPane.getLayout();
 		cardLayout.show(contentPane, "usersCard");
-
 	}
 
 

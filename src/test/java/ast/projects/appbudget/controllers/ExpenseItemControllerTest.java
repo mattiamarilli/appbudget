@@ -44,7 +44,6 @@ public class ExpenseItemControllerTest {
         closeable.close();
     }
     
-    
     @Test
     public void testAllExpenseItemsByBudgetSuccess() {
     	Budget budget = new Budget(1, "title", 1000);
@@ -52,7 +51,9 @@ public class ExpenseItemControllerTest {
         expenseItem.setBudgetId(budget.getId());
         List<ExpenseItem> expenseItems = Arrays.asList(expenseItem);
         when(expenseItemRepository.findByBudgetId(budget.getId())).thenReturn(expenseItems);
+        
         expenseItemController.allExpenseItemsByBudget(budget);
+        
         verify(budgetAppView).refreshExpenseItemsLists(expenseItems);
         verify(budgetAppView).resetExpenseItemErrorMessage();
     }
@@ -61,7 +62,9 @@ public class ExpenseItemControllerTest {
     public void testAllExpenseItemsByBudgetFailure() {
     	Budget budget = new Budget(1, "title", 1000);
         doThrow(new RuntimeException()).when(expenseItemRepository).findByBudgetId(1);
+        
         expenseItemController.allExpenseItemsByBudget(budget);
+        
         verify(budgetAppView).showExpenseItemErrorMessage("Error fetching expense items");
     }
 
@@ -70,7 +73,6 @@ public class ExpenseItemControllerTest {
         Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
         expenseItem.setBudgetId(budget.getId());
-
         when(expenseItemRepository.findByBudgetId(budget.getId()))
             .thenReturn(Arrays.asList(expenseItem));
 
@@ -85,7 +87,6 @@ public class ExpenseItemControllerTest {
     @Test
     public void testAddExpenseItemFailure() {
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-
         doThrow(new RuntimeException()).when(expenseItemRepository).save(any(ExpenseItem.class));
 
         expenseItemController.addExpenseItem(expenseItem);
@@ -98,7 +99,6 @@ public class ExpenseItemControllerTest {
         Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
         expenseItem.setBudgetId(budget.getId());
-
         when(expenseItemRepository.findByBudgetId(budget.getId()))
             .thenReturn(Arrays.asList(expenseItem));
 
@@ -113,7 +113,6 @@ public class ExpenseItemControllerTest {
     @Test
     public void testUpdateExpenseItemFailure() {
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-
         doThrow(new RuntimeException()).when(expenseItemRepository).update(any(ExpenseItem.class));
 
         expenseItemController.updateExpenseItem(expenseItem);
@@ -126,7 +125,6 @@ public class ExpenseItemControllerTest {
         Budget budget = new Budget(1, "title", 1000);
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
         expenseItem.setBudgetId(budget.getId());
-
         when(expenseItemRepository.findByBudgetId(budget.getId()))
             .thenReturn(Arrays.asList(expenseItem));
 
@@ -141,7 +139,6 @@ public class ExpenseItemControllerTest {
     @Test
     public void testDeleteExpenseItemFailure() {
         ExpenseItem expenseItem = new ExpenseItem("Cinema", Type.NEEDS, 10);
-
         doThrow(new RuntimeException()).when(expenseItemRepository).delete(any(ExpenseItem.class));
 
         expenseItemController.deleteExpenseItem(expenseItem);

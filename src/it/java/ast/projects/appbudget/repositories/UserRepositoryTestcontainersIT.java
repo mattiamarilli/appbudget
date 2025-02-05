@@ -58,6 +58,12 @@ public class UserRepositoryTestcontainersIT {
             mariaDB.close();
         }
     }
+    
+    private User addTestUserToDatabase(String name, String surname) {
+        User user = new User(name, surname);
+        userRepository.save(user);
+        return user;
+    }
 
     @Test
     public void testFindAll() {
@@ -92,11 +98,5 @@ public class UserRepositoryTestcontainersIT {
 
         List<User> users = userRepository.findAll();
         assertThat(users).isEmpty();
-    }
-
-    private User addTestUserToDatabase(String name, String surname) {
-        User user = new User(name, surname);
-        userRepository.save(user);
-        return user;
     }
 }

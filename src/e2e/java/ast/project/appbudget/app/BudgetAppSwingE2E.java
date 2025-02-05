@@ -104,271 +104,7 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		sessionFactory.close();
 		mariaDB.close();
 	}
-
-	@Test
-	@GUITest
-	public void testOnStartAllDatabaseElementsAreShown() {
-		assertThat(window.list("listUsers").contents()).anySatisfy(e -> assertThat(e).contains("Mario", "Rossi"))
-				.anySatisfy(e -> assertThat(e).contains("Luigi", "Bianchi"));
-	}
-
-	@Test
-	@GUITest
-	public void testAddUserButtonSuccess() {
-		window.textBox("textFieldUserName").enterText("Vittorio");
-		window.textBox("textFieldUserSurname").enterText("Verdi");
-
-		window.button(JButtonMatcher.withText("Add")).click();
-		assertThat(window.list("listUsers").contents()).anySatisfy(e -> assertThat(e).contains("Vittorio", "Verdi"));
-
-	}
 	
-	@Test
-	@GUITest
-	public void testAddUserButtonError() {
-		window.textBox("textFieldUserName").enterText("Mario");
-		window.textBox("textFieldUserSurname").enterText("Rossi");
-		window.button(JButtonMatcher.withText("Add")).click();
-		assertThat(window.label("lblUserError").text()).contains("Error adding new user");
-	}
-
-	@Test
-	@GUITest
-	public void testAddBudgetButtonSuccess() {
-
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
-		window.textBox("textFieldBudgetIncomes").enterText("3000");
-		window.button(JButtonMatcher.withText("Add Budget")).click();
-
-		assertThat(window.list("listBudgets").contents())
-				.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
-
-	}
-	
-	@Test
-	@GUITest
-	public void testAddBudgetButtonError() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.textBox("textFieldBudgetTitle").enterText("Maggio 2024");
-		window.textBox("textFieldBudgetIncomes").enterText("3000");
-		window.button(JButtonMatcher.withText("Add Budget")).click();
-		assertThat(window.label("lblBudgetError").text()).contains("Error adding new budget");
-
-	}
-
-	@Test
-	@GUITest
-	public void testAddExpenseItemButtonSucess() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(0);
-		
-		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
-		window.textBox("textFieldExpenseItemAmount").enterText("50");
-		window.comboBox("comboBoxExpenseItemType").selectItem(0);
-		window.button(JButtonMatcher.withText("Add Expense")).click();
-		
-		window.textBox("textFieldExpenseItemTitle").enterText("Palestra");
-		window.textBox("textFieldExpenseItemAmount").enterText("200");
-		window.comboBox("comboBoxExpenseItemType").selectItem(1);
-		window.button(JButtonMatcher.withText("Add Expense")).click();
-		
-		window.textBox("textFieldExpenseItemTitle").enterText("Viaggio");
-		window.textBox("textFieldExpenseItemAmount").enterText("30");
-		window.comboBox("comboBoxExpenseItemType").selectItem(2);
-		window.button(JButtonMatcher.withText("Add Expense")).click();
-		
-		assertThat(window.list("listNeeds").contents())
-		.anySatisfy(e -> assertThat(e).contains("Spesa - 50.0 - NEEDS"));
-		
-		assertThat(window.list("listWants").contents())
-		.anySatisfy(e -> assertThat(e).contains("Palestra - 200.0 - WANTS"));
-		
-		assertThat(window.list("listSavings").contents())
-		.anySatisfy(e -> assertThat(e).contains("Viaggio - 30.0 - SAVINGS"));
-	}
-
-
-	@Test
-	@GUITest
-	public void testAddExpenseItemButtonError() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(0);
-		
-		window.textBox("textFieldExpenseItemTitle").enterText("Benzina");
-		window.textBox("textFieldExpenseItemAmount").enterText("50");
-		window.comboBox("comboBoxExpenseItemType").selectItem(0);
-		window.button(JButtonMatcher.withText("Add Expense")).click();
-
-	}
-	
-	
-	@Test
-	@GUITest
-	public void testModifyBudgetButtonSuccess() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
-		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
-		window.textBox("textFieldBudgetIncomes").enterText("3000");
-		window.button(JButtonMatcher.withText("Modify Budget")).click();
-		
-		assertThat(window.list("listBudgets").contents())
-		.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
-
-	}
-
-	@Test
-	@GUITest
-	public void testModifyBudgetButtonError() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
-		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
-		window.textBox("textFieldBudgetIncomes").enterText("3000");
-		
-		deleteBudgetFromDatabase((long) 1);
-		
-		window.button(JButtonMatcher.withText("Modify Budget")).click();
-		
-		assertThat(window.list("listBudgets").contents())
-		.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
-		
-		assertThat(window.label("lblBudgetError").text()).contains("Error updating budget");
-		
-	}
-
-	@Test
-	@GUITest
-	public void testModifyExpenseItemButtonSuccess() {
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(0);
-		
-		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
-		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
-		window.textBox("textFieldExpenseItemAmount").enterText("50");
-		window.comboBox("comboBoxExpenseItemType").selectItem(0);
-		
-		window.button(JButtonMatcher.withText("Modify Expense")).click();
-		
-		assertThat(window.list("listNeeds").contents())
-		.anySatisfy(e -> assertThat(e).contains("Spesa - 50.0 - NEEDS"));
-		
-
-
-	}
-
-	@Test
-	@GUITest
-	public void testModifyExpenseItemButtonError() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(0);
-		
-		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
-		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
-		window.textBox("textFieldExpenseItemAmount").enterText("50");
-		window.comboBox("comboBoxExpenseItemType").selectItem(0);
-		
-		deleteBudgetFromDatabase((long) 1);
-		
-		window.button(JButtonMatcher.withText("Modify Expense")).click();
-		
-		assertThat(window.label("lblExpenseError").text()).contains("Error updating expense");
-
-	}
-	
-
-	@Test
-	@GUITest
-	public void testDeleteUserButtonSuccess() {
-		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
-		window.button(JButtonMatcher.withText("Delete User")).click();
-		assertThat(window.list("listUsers").contents()).noneMatch(e -> e.contains("Luigi" + " " + "Bianchi"));
-	}
-
-	@Test
-	@GUITest
-	public void testDeleteUserButtonError() {
-		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
-
-		deleteUserFromDatabase((long) 2);
-
-		window.button(JButtonMatcher.withText("Delete User")).click();
-
-		assertThat(window.label("lblUserError").text()).contains("Error deleting user");
-	}
-
-	@Test
-	@GUITest
-	public void testDeleteBudgetButtonSuccess() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
-		window.button(JButtonMatcher.withText("Delete Budget")).click();
-		assertThat(window.list("listBudgets").contents()).noneMatch(e -> e.contains("Maggio 2024 - 2000.0$"));
-		
-		
-
-	}
-
-	@Test
-	@GUITest
-	public void testDeleteBudgetButtonError() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
-		
-		deleteBudgetFromDatabase((long) 1);
-		
-		window.button(JButtonMatcher.withText("Delete Budget")).click();
-
-		assertThat(window.label("lblBudgetError").text()).contains("Error deleting budget");
-	}
-
-	@Test
-	@GUITest
-	public void testDeleteExpenseItemButtonSuccess() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(0);
-		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
-		window.button(JButtonMatcher.withText("Delete Expense")).click();
-		
-		assertThat(window.list("listBudgets").contents()).noneMatch(e -> e.contains("Benzina - 10.0 - NEEDS"));
-
-
-	}
-
-	@Test
-	@GUITest
-	public void testDeleteExpenseItemButtonError() {
-		
-		window.list("listUsers").selectItem(0);
-		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		window.list("listBudgets").selectItem(0);
-		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
-		
-		deleteExpenseItemFromDatabase((long) 1);
-		
-		window.button(JButtonMatcher.withText("Delete Expense")).click();
-
-	}
-
 	private void saveUserManually(User user) {
 	    Session session = sessionFactory.openSession();
 	    session.beginTransaction();
@@ -424,5 +160,233 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 	    }
 	    transaction.commit();
 	    session.close();
+	}
+
+	@Test
+	@GUITest
+	public void testOnStartAllDatabaseElementsAreShown() {
+		assertThat(window.list("listUsers").contents()).anySatisfy(e -> assertThat(e).contains("Mario", "Rossi"))
+				.anySatisfy(e -> assertThat(e).contains("Luigi", "Bianchi"));
+	}
+
+	@Test
+	@GUITest
+	public void testAddUserButtonSuccess() {
+		window.textBox("textFieldUserName").enterText("Vittorio");
+		window.textBox("textFieldUserSurname").enterText("Verdi");
+		window.button(JButtonMatcher.withText("Add")).click();
+		
+		assertThat(window.list("listUsers").contents()).anySatisfy(e -> assertThat(e).contains("Vittorio", "Verdi"));
+
+	}
+	
+	@Test
+	@GUITest
+	public void testAddUserButtonError() {
+		window.textBox("textFieldUserName").enterText("Mario");
+		window.textBox("textFieldUserSurname").enterText("Rossi");
+		window.button(JButtonMatcher.withText("Add")).click();
+		
+		assertThat(window.label("lblUserError").text()).contains("Error adding new user");
+	}
+
+	@Test
+	@GUITest
+	public void testAddBudgetButtonSuccess() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
+		window.textBox("textFieldBudgetIncomes").enterText("3000");
+		window.button(JButtonMatcher.withText("Add Budget")).click();
+
+		assertThat(window.list("listBudgets").contents())
+				.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
+	}
+	
+	@Test
+	@GUITest
+	public void testAddBudgetButtonError() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.textBox("textFieldBudgetTitle").enterText("Maggio 2024");
+		window.textBox("textFieldBudgetIncomes").enterText("3000");
+		window.button(JButtonMatcher.withText("Add Budget")).click();
+		
+		assertThat(window.label("lblBudgetError").text()).contains("Error adding new budget");
+	}
+
+	@Test
+	@GUITest
+	public void testAddExpenseItemButtonSucess() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		
+		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
+		window.textBox("textFieldExpenseItemAmount").enterText("50");
+		window.comboBox("comboBoxExpenseItemType").selectItem(0);
+		window.button(JButtonMatcher.withText("Add Expense")).click();
+		
+		window.textBox("textFieldExpenseItemTitle").enterText("Palestra");
+		window.textBox("textFieldExpenseItemAmount").enterText("200");
+		window.comboBox("comboBoxExpenseItemType").selectItem(1);
+		window.button(JButtonMatcher.withText("Add Expense")).click();
+		
+		window.textBox("textFieldExpenseItemTitle").enterText("Viaggio");
+		window.textBox("textFieldExpenseItemAmount").enterText("30");
+		window.comboBox("comboBoxExpenseItemType").selectItem(2);
+		window.button(JButtonMatcher.withText("Add Expense")).click();
+		
+		assertThat(window.list("listNeeds").contents())
+		.anySatisfy(e -> assertThat(e).contains("Spesa - 50.0$ - NEEDS"));
+		
+		assertThat(window.list("listWants").contents())
+		.anySatisfy(e -> assertThat(e).contains("Palestra - 200.0$ - WANTS"));
+		
+		assertThat(window.list("listSavings").contents())
+		.anySatisfy(e -> assertThat(e).contains("Viaggio - 30.0$ - SAVINGS"));
+	}
+
+	@Test
+	@GUITest
+	public void testAddExpenseItemButtonError() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		
+		window.textBox("textFieldExpenseItemTitle").enterText("Benzina");
+		window.textBox("textFieldExpenseItemAmount").enterText("50");
+		window.comboBox("comboBoxExpenseItemType").selectItem(0);
+		window.button(JButtonMatcher.withText("Add Expense")).click();
+	}
+	
+	@Test
+	@GUITest
+	public void testModifyBudgetButtonSuccess() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
+		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
+		window.textBox("textFieldBudgetIncomes").enterText("3000");
+		window.button(JButtonMatcher.withText("Modify Budget")).click();
+		
+		assertThat(window.list("listBudgets").contents())
+		.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
+	}
+
+	@Test
+	@GUITest
+	public void testModifyBudgetButtonError() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
+		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
+		window.textBox("textFieldBudgetIncomes").enterText("3000");
+		deleteBudgetFromDatabase((long) 1);
+		window.button(JButtonMatcher.withText("Modify Budget")).click();
+		
+		assertThat(window.list("listBudgets").contents())
+		.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
+		assertThat(window.label("lblBudgetError").text()).contains("Error updating budget");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyExpenseItemButtonSuccess() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
+		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
+		window.textBox("textFieldExpenseItemAmount").enterText("50");
+		window.comboBox("comboBoxExpenseItemType").selectItem(0);
+		
+		window.button(JButtonMatcher.withText("Modify Expense")).click();
+		
+		assertThat(window.list("listNeeds").contents())
+		.anySatisfy(e -> assertThat(e).contains("Spesa - 50.0$ - NEEDS"));
+	}
+
+	@Test
+	@GUITest
+	public void testModifyExpenseItemButtonError() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
+		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
+		window.textBox("textFieldExpenseItemAmount").enterText("50");
+		window.comboBox("comboBoxExpenseItemType").selectItem(0);
+		deleteBudgetFromDatabase((long) 1);
+		window.button(JButtonMatcher.withText("Modify Expense")).click();
+	
+		assertThat(window.label("lblExpenseError").text()).contains("Error updating expense");
+	}
+	
+	@Test
+	@GUITest
+	public void testDeleteUserButtonSuccess() {
+		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
+		window.button(JButtonMatcher.withText("Delete User")).click();
+		
+		assertThat(window.list("listUsers").contents()).noneMatch(e -> e.contains("Luigi" + " " + "Bianchi"));
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteUserButtonError() {
+		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
+		deleteUserFromDatabase((long) 2);
+		window.button(JButtonMatcher.withText("Delete User")).click();
+		
+		assertThat(window.label("lblUserError").text()).contains("Error deleting user");
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteBudgetButtonSuccess() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
+		window.button(JButtonMatcher.withText("Delete Budget")).click();
+		
+		assertThat(window.list("listBudgets").contents()).noneMatch(e -> e.contains("Maggio 2024 - 2000.0$"));
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteBudgetButtonError() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
+		deleteBudgetFromDatabase((long) 1);
+		
+		window.button(JButtonMatcher.withText("Delete Budget")).click();
+		assertThat(window.label("lblBudgetError").text()).contains("Error deleting budget");
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteExpenseItemButtonSuccess() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
+		window.button(JButtonMatcher.withText("Delete Expense")).click();
+		
+		assertThat(window.list("listBudgets").contents()).noneMatch(e -> e.contains("Benzina - 10.0 - NEEDS"));
+	}
+
+	@Test
+	@GUITest
+	public void testDeleteExpenseItemButtonError() {
+		window.list("listUsers").selectItem(0);
+		window.button(JButtonMatcher.withText("Open Budgets")).click();
+		window.list("listBudgets").selectItem(0);
+		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
+		deleteExpenseItemFromDatabase((long) 1);
+		window.button(JButtonMatcher.withText("Delete Expense")).click();
+		
+		assertThat(window.label("lblExpenseError").text()).contains("Error deleting expense item");
 	}
 }

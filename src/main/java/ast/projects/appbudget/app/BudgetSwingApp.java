@@ -26,12 +26,23 @@ import ast.projects.appbudget.repositories.ExpenseItemRepositorySqlImplementatio
 import ast.projects.appbudget.repositories.UserRepositorySqlImplementation;
 import ast.projects.appbudget.views.BudgetAppSwingView;
 
+/**
+ * This class serves as the main entry point for the budget management
+ * application. It initializes the user interface, configures the database, and
+ * establishes the connections between the various components of the
+ * application.
+ */
 public class BudgetSwingApp {
 
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-            	
+	/**
+	 * The main method initializes the application.
+	 *
+	 * @param args Command-line arguments
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(() -> {
+			try {
+
 				String dbHost = System.getProperty("app.db_host", "localhost");
 				String dbPort = System.getProperty("app.db_port", "3306");
 				String dbUsername = System.getProperty("app.mariadb_username", "testuser");
@@ -41,7 +52,7 @@ public class BudgetSwingApp {
 				String sqlFilePath = "initializer.sql";
 
 				initDB(url, "root", "rootpassword", sqlFilePath);
-				
+
 				SessionFactory factory = new Configuration()
 						.setProperty("hibernate.dialect", "org.hibernate.dialect.MariaDBDialect")
 						.setProperty("hibernate.connection.url",
@@ -54,47 +65,59 @@ public class BudgetSwingApp {
 						.addAnnotatedClass(Budget.class)
 						.addAnnotatedClass(ExpenseItem.class)
 						.buildSessionFactory();
-				
-                UserRepositorySqlImplementation userRepository = new UserRepositorySqlImplementation(factory);
-                BudgetRepositorySqlImplementation budgetRepository = new BudgetRepositorySqlImplementation(factory);
-                ExpenseItemRepositorySqlImplementation expenseItemRepository = new ExpenseItemRepositorySqlImplementation(factory);
-                
-                BudgetAppSwingView view = new BudgetAppSwingView();
-                UserController userController = new UserController(view, userRepository);
-                BudgetController budgetController = new BudgetController(view,budgetRepository);
-                ExpenseItemController expenseItemController = new ExpenseItemController(view,expenseItemRepository);
 
-                view.setUserController(userController);
-                view.setBudgetController(budgetController);
-                view.setExpenseItemController(expenseItemController);
-                view.setVisible(true);
-                LogManager.getLogger().info("App stated");
+				UserRepositorySqlImplementation userRepository = new UserRepositorySqlImplementation(factory);
+				BudgetRepositorySqlImplementation budgetRepository = new BudgetRepositorySqlImplementation(factory);
+				ExpenseItemRepositorySqlImplementation expenseItemRepository = new ExpenseItemRepositorySqlImplementation(
+						factory);
 
-            } catch (Exception e) {
-            	LogManager.getLogger().debug(e.getStackTrace());
-            }   
-        });
-    }
+				BudgetAppSwingView view = new BudgetAppSwingView();
+				UserController userController = new UserController(view, userRepository);
+				BudgetController budgetController = new BudgetController(view, budgetRepository);
+				ExpenseItemController expenseItemController = new ExpenseItemController(view, expenseItemRepository);
 
-    private static void initDB(String url, String username, String password, String sqlFileName) {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try (Connection connection = DriverManager.getConnection(url, username, password);
-             InputStream inputStream = loader.getResourceAsStream(sqlFileName);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+				view.setUserController(userController);
+				view.setBudgetController(budgetController);
+				view.setExpenseItemController(expenseItemController);
+				view.setVisible(true);
+				LogManager.getLogger().info("App started");
 
-            if (inputStream == null) {
-                throw new FileNotFoundException("File " + sqlFileName + " not found in resources");
-            }
+			} catch (Exception e) {
+				LogManager.getLogger().debug(e.getStackTrace());
+			}
+		});
+	}
 
-            String sql;
-            while ((sql = reader.readLine()) != null) {
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute(sql);
-                }
-            }
-        } catch (SQLException | IOException e) {
-        	LogManager.getLogger().debug(e.getStackTrace());
-        }
-    }
+	/**
+	 * Initializes the database schema based on the provided SQL script.
+	 *
+	 * @param url         The JDBC connection URL for the database.
+	 * @param username    The username for database authentication.
+	 * @param password    The password for database authentication.
+	 * @param sqlFileName The name of the SQL script file to execute.
+	 * @throws SQLException If an error occurs while connecting to or interacting
+	 *                      with the database.
+	 * @throws IOException  If an error occurs while reading the SQL script file.
+	 */
+	private static void initDB(String url, String username, String password, String sqlFileName) {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try (Connection connection = DriverManager.getConnection(url, username, password);
+				InputStream inputStream = loader.getResourceAsStream(sqlFileName);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
+			if (inputStream == null) {
+				throw new FileNotFoundException("File " + sqlFileName + " not found in resources");
+			}
+
+			String sql;
+			while ((sql = reader.readLine()) != null) {
+				try (Statement statement = connection.createStatement()) {
+					statement.execute(sql);
+				}
+			}
+		} catch (SQLException | IOException e) {
+			LogManager.getLogger().debug(e.getStackTrace());
+		}
+	}
 
 }

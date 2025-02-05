@@ -112,7 +112,6 @@ public class UserRepositorySqlImplementationTest {
     @Test
     public void testSaveUser() {
         User user = new User("testname1", "testsurname1");
-
         userRepository.save(user);
         List<User> users = getUsersFromDatabaseManually();
         
@@ -128,8 +127,10 @@ public class UserRepositorySqlImplementationTest {
     @Test
     public void testSaveUserWhenUserIsAlreadyInDB() {
         User user = saveUserManually("testname1", "testsurname1");
+        
         assertThrows(ConstraintViolationException.class, () -> userRepository.save(user));
         Session session = userRepository.getSession();
+        
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
         assertThat(session.isOpen()).isFalse();
         assertThat(getUsersFromDatabaseManually()).hasSize(1);
@@ -152,8 +153,10 @@ public class UserRepositorySqlImplementationTest {
     public void testDeleteUserThatIsNotInDB() {
         User user = new User("testname1", "testsurname1");
         user.setId(1);
+        
         assertThrows(OptimisticLockException.class, () -> userRepository.delete(user));
         Session session = userRepository.getSession();
+        
         assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
     }

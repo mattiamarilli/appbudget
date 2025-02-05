@@ -65,17 +65,19 @@ public class User {
     public void setSurname(String surname) {
         this.surname = surname;
     }
-    
-    @Override
-    public String toString() {
-        return name + " " + surname;
-    }
-    
-    public List<Budget> getBudgets() {
-		return budgets;
-	}
-
+   
 	public void setBudgets(List<Budget> budgets) {
 		this.budgets = budgets;
 	}
+	
+    @Override
+    public String toString() {
+    	if(name != null && surname != null) {
+    		return name + " " + surname;
+    	}
+    	else {
+    		return "Name or surname not valid";
+    	}
+        
+    }
 }

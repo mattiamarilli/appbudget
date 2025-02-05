@@ -15,8 +15,8 @@
 		<testcontainers.version>1.19.3</testcontainers.version>
 
 		<sonar.issue.ignore.multicriteria>e11,e12</sonar.issue.ignore.multicriteria>
-		
-		<!-- Disable rule: Add at least one assertion to this test case. No compatibility between SonarQube and AssertJ Swing -->
+
+		<!-- Disable rule: S2699 - No compatibility between SonarQube and AssertJ Swing -->
 		<sonar.issue.ignore.multicriteria.e11.ruleKey>
 			java:S2699
 		</sonar.issue.ignore.multicriteria.e11.ruleKey>
@@ -24,7 +24,7 @@
 			**/BudgetAppSwing*.java
 		</sonar.issue.ignore.multicriteria.e11.resourceKey>
 
-		<!-- Disable rule: Rename class "BudgetSwingAppE2E" to match the regular expression: '^((Test|IT)[a-zA-Z0-9_]+|[A-Z][a-zA-Z0-9_]*(Test|Tests|TestCase|IT|ITCase))$'-->
+		<!-- Disable rule: S3577-->
 		<sonar.issue.ignore.multicriteria.e12.ruleKey>
 			java:S3577
 		</sonar.issue.ignore.multicriteria.e12.ruleKey>
@@ -44,7 +44,6 @@
 	</properties>
 
 	<dependencies>
-
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -93,12 +92,12 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<version>3.4.1</version>
+			<version>3.5.1</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<artifactId>slf4j-reload4j</artifactId>
 			<version>1.7.36</version>
 		</dependency>
 
@@ -192,7 +191,6 @@
 							<param>javax.swing.JButton</param>
 							<param>javax.swing.JScrollPane</param>
 							<param>javax.swing.JTextField</param>
-							<param>javax.swing.JPasswordField</param>
 							<param>javax.swing.JTabbedPane</param>
 							<param>java.awt.CardLayout</param>
 							<param>javax.swing.JList</param>
@@ -208,7 +206,6 @@
 							<param>ast.projects.appbudget.**.*IT</param>
 							<param>ast.projects.appbudget.**.*E2E</param>
 						</excludedTestClasses>
-						<!-- <mutationThreshold>0</mutationThreshold>-->
 					</configuration>
 					<executions>
 						<execution>
@@ -264,8 +261,8 @@
 						<exclude>**/src/test/java**</exclude>
 						<exclude>**/src/it/java**</exclude>
 						<exclude>**/src/e2e/java**</exclude>
-						<exclude>**/User.*</exclude>
-						<exclude>**/DocumentListener.changedUpdate**</exclude>
+						<exclude>**/User.setName</exclude>
+						<exclude>**/User.setSurname</exclude>
 					</excludes>
 				</configuration>
 				<executions>
@@ -320,7 +317,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -349,113 +345,17 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<mainClass>ast.projects.appbudget.app.BudgetSwingApp</mainClass>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
-		<profile>
-			<id>docker</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>io.fabric8</groupId>
-						<artifactId>docker-maven-plugin</artifactId>
-						<version>0.45.0</version>
-						<configuration>
-							<showLogs>true</showLogs>
-							<verbose>build</verbose>
-							<autoCreateCustomNetworks>true</autoCreateCustomNetworks>
-							<images>
-								<image>
-									<alias>java-appbudget</alias>
-									<name>java-appbudget</name>
-									<build>
-										<contextDir>${project.basedir}</contextDir>
-										<args>
-											<jarToCopy>
-												${project.artifactId}-${project.version}-jar-with-dependencies.jar
-											</jarToCopy>
-										</args>
-									</build>
-									<run>
-										<network>
-											<mode>custom</mode>
-											<name>app-network</name>
-										</network>
-										<wait>
-											<log>App stated</log>
-											<time>10000</time>
-										</wait>
-										<dependsOn>
-											<container>db</container>
-										</dependsOn>
-									</run>
-								</image>
-								<image>
-									<name>db</name>
-									<alias>db</alias>
-									<build>
-										<from>mariadb</from>
-										<healthCheck>
-											<interval>10s</interval>
-											<timeout>50s</timeout>
-											<retries>3</retries>
-											<start-period>20s</start-period>
-											<cmd>["sh", "-c", "healthcheck.sh
-												--connect --innodb_initialized"]</cmd>
-										</healthCheck>
-										<assembly>
-											<mode>dir</mode>
-											<targetDir>
-												/docker-entrypoint-initdb.d</targetDir>
-											<inline>
-												<files>
-													<file>
-														<source>
-															./sql/initializer.sql</source>
-													</file>
-												</files>
-											</inline>
-										</assembly>
-										<env>
-											<MARIADB_ALLOW_EMPTY_ROOT_PASSWORD>
-												yes</MARIADB_ALLOW_EMPTY_ROOT_PASSWORD>
-										</env>
-									</build>
-									<run>
-										<network>
-											<mode>custom</mode>
-											<name>app-network</name>
-											<alias>db</alias>
-										</network>
-										<wait>
-											<healthy>true</healthy>
-											<time>40000</time>
-										</wait>
-									</run>
-								</image>
-							</images>
-						</configuration>
-						<executions>
-							<execution>
-								<id>docker-build-image</id>
-								<phase>package</phase>
-								<goals>
-									<goal>build</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>docker-verify</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>start</goal>
-									<goal>stop</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<profile>
 			<id>pitmutation</id>
 			<build>

@@ -83,6 +83,12 @@ public class ExpenseItem {
 
 	@Override
     public String toString() {
-        return title + " - " + amount + " - " + type;
+		if(title != null && type != null)
+		{
+			return title + " - " + amount + "$ - " + type;
+		}
+		else {
+			return "Title or type not valid";
+		}
     }
 }

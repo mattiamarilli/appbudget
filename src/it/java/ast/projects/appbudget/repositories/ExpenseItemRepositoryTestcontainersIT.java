@@ -59,6 +59,12 @@ public class ExpenseItemRepositoryTestcontainersIT {
             mariaDB.close();
         }
     }
+    
+    private ExpenseItem addTestExpenseItemToDatabase(String title, Type type, double amount) {
+        ExpenseItem expenseItem = new ExpenseItem(title, type, amount);
+        expenseItemRepository.save(expenseItem);
+        return expenseItem;
+    }
 
     @Test
     public void testFindAll() {
@@ -97,11 +103,5 @@ public class ExpenseItemRepositoryTestcontainersIT {
 
         List<ExpenseItem> expenseItems = expenseItemRepository.findAll();
         assertThat(expenseItems).isEmpty();
-    }
-
-    private ExpenseItem addTestExpenseItemToDatabase(String title, Type type, double amount) {
-        ExpenseItem expenseItem = new ExpenseItem(title, type, amount);
-        expenseItemRepository.save(expenseItem);
-        return expenseItem;
     }
 }

@@ -53,7 +53,10 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		}
 	}
 
-	// Helper functions for ExpenseItem
+    /*
+     * Helper functions for interacting with the database and creating test data.
+     * These methods are used by the test methods below to perform common operations
+     */
 
 	private void deleteExpenseItemTable() {
 	    Session session = sessionFactory.openSession();
@@ -95,16 +98,12 @@ public class ExpenseItemRepositorySqlImplementationTest {
 
 	    Budget budget1 = new Budget("testtitle1", 1000);
 	    Budget budget2 = new Budget("testtitle2", 2000);
-
 	    saveBudgetManually(budget1);
 	    saveBudgetManually(budget2);
-
 	    ExpenseItem expenseItem1 = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 	    ExpenseItem expenseItem2 = new ExpenseItem("testtitle2", Type.WANTS, 15);
-
 	    expenseItem1.setBudgetId(budget1.getId());
 	    expenseItem2.setBudgetId(budget2.getId());
-
 	    saveExpenseItemManually(expenseItem1);
 	    saveExpenseItemManually(expenseItem2);
 
@@ -131,12 +130,12 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	@Test
 	public void testFindByBudgetIdWhenExpenseItemTableDoesNotExist() {
 	    deleteExpenseItemTable();
-
 	    Budget budget = new Budget("testtitle1", 1000);
 	    saveBudgetManually(budget);
 	    long id = budget.getId();
 
 	    assertThrows(PersistenceException.class, () -> expenseItemRepository.findByBudgetId(id));
+	    
 	    assertThat(expenseItemRepository.getSession().isOpen()).isFalse();
 	}
 
@@ -179,10 +178,9 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	@Test
 	public void testSaveExpenseItem() {
 		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 50);
-
+		
 		expenseItemRepository.save(expenseItem);
 		List<ExpenseItem> expenseItems = getExpenseItemsFromDatabaseManually();
-
 		Session session = expenseItemRepository.getSession();
 
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
@@ -198,15 +196,13 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		
 	    Budget budget = new Budget("testtitle1", 1000);
 	    saveBudgetManually(budget);
-	    
 	    ExpenseItem expenseItemToSave = new ExpenseItem("testtitle1", Type.NEEDS, 50);
-	    
 	    expenseItemToSave.setBudgetId(budget.getId());	
-		
 		ExpenseItem expenseItem = saveExpenseItemManually(expenseItemToSave);
 		
 		assertThrows(ConstraintViolationException.class, () -> expenseItemRepository.save(expenseItem));
 		Session session = expenseItemRepository.getSession();
+		
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
 		assertThat(session.isOpen()).isFalse();
 		assertThat(getExpenseItemsFromDatabaseManually()).hasSize(1);
@@ -229,8 +225,10 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	public void testDeleteExpenseItemThatIsNotInDB() {
 		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 		expenseItem.setId(1);
+		
 		assertThrows(OptimisticLockException.class, () -> expenseItemRepository.delete(expenseItem));
 		Session session = expenseItemRepository.getSession();
+		
 		assertThat(session.isOpen()).isFalse();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
 	}
@@ -240,6 +238,7 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		ExpenseItem expenseItem = saveExpenseItemManually(new ExpenseItem("testtitle1", Type.NEEDS, 50));
 		expenseItem.setTitle("updatedtitle");
 		expenseItem.setAmount(100);
+		
 		expenseItemRepository.update(expenseItem);
 		ExpenseItem updatedExpenseItem = getExpenseItemsFromDatabaseManually().get(0);
 
@@ -252,8 +251,10 @@ public class ExpenseItemRepositorySqlImplementationTest {
 	public void testUpdateExpenseItemNotInDB() {
 		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 50);
 		expenseItem.setId(1);
+		
 		assertThrows(OptimisticLockException.class, () -> expenseItemRepository.update(expenseItem));
 		Session session = expenseItemRepository.getSession();
+		
 		assertThat(session.isOpen()).isFalse();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
 	}

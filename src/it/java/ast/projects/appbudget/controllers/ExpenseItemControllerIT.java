@@ -31,7 +31,6 @@ public class ExpenseItemControllerIT {
 
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(
             DockerImageName.parse("mariadb:10.5.5"));
-
     private ExpenseItemRepositorySqlImplementation expenseItemRepository;
     private BudgetRepositorySqlImplementation budgetRepository;
 
@@ -47,7 +46,7 @@ public class ExpenseItemControllerIT {
     @ClassRule
     public static final MariaDBContainer<?> mariaDB = MARIA_DB_CONTAINER.withUsername("root").withPassword("")
             .withInitScript("initializer.sql");
-
+    
     @Before
     public void setup() {
         closeable = MockitoAnnotations.openMocks(this);
@@ -91,6 +90,7 @@ public class ExpenseItemControllerIT {
         expenseItemController.addExpenseItem(expenseItemToSave);
         
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
+        
         assertThat(expenseItem.getTitle()).isEqualTo("testtitle");
         assertThat(expenseItem.getAmount()).isEqualTo(10);
         assertThat(expenseItem.getType()).isEqualTo(Type.NEEDS);
@@ -110,19 +110,16 @@ public class ExpenseItemControllerIT {
         ExpenseItem expenseToUpdate = new ExpenseItem("testtitle", Type.NEEDS ,10);
         expenseToUpdate.setBudgetId(b.getId());
         expenseItemController.addExpenseItem(expenseToUpdate);
-
         expenseToUpdate.setTitle("testtitle2");
         expenseToUpdate.setType(Type.WANTS);
         expenseToUpdate.setAmount(20);
         
         expenseItemController.updateExpenseItem(expenseToUpdate);
-
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
         
         assertThat(expenseItem.getTitle()).isEqualTo("testtitle2");
         assertThat(expenseItem.getAmount()).isEqualTo(20);
         assertThat(expenseItem.getType()).isEqualTo(Type.WANTS);
-        
         verify(view).refreshExpenseItemsLists(
                 argThat(expenseItems -> expenseItems.size() == 1 &&
                 		expenseItems.get(0).getId() == 1 &&

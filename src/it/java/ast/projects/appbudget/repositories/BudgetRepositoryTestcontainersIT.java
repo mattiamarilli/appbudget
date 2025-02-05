@@ -58,6 +58,12 @@ public class BudgetRepositoryTestcontainersIT {
             mariaDB.close();
         }
     }
+    
+    private Budget addTestBudgetToDatabase(String title, double amount) {
+        Budget budget = new Budget(title, amount);
+        budgetRepository.save(budget);
+        return budget;
+    }
 
     @Test
     public void testFindAll() {
@@ -92,11 +98,5 @@ public class BudgetRepositoryTestcontainersIT {
 
         List<Budget> budgets = budgetRepository.findAll();
         assertThat(budgets).isEmpty();
-    }
-
-    private Budget addTestBudgetToDatabase(String title, double amount) {
-        Budget budget = new Budget(title, amount);
-        budgetRepository.save(budget);
-        return budget;
     }
 }

@@ -110,7 +110,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     
     @Test
     public void testAddBudget() {
-    	
     	User user = new User(1, "testname", "testsurname");
 		
 		GuiActionRunner.execute(() -> {
@@ -123,6 +122,7 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Add Budget")).click();
 		
 		List<Budget> budgets = budgetRepository.findAll();
+		
 		assertThat(budgets.size()).isOne();
 		assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
 		assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
@@ -131,10 +131,8 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     
     @Test
     public void testAddExpense() {
-    	
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
-		
 		user.setBudgets(Arrays.asList(budget));
 		budget.setUserId(user.getId());
 		
@@ -158,9 +156,7 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
         assertThat(expenseItems.get(0).getAmount()).isEqualTo(10);
         assertThat(expenseItems.get(0).getType()).isEqualTo(Type.NEEDS);
         assertThat(expenseItems.get(0).getBudgetId()).isOne();
-    	
     }
-    
     
     @Test
     public void testModifyBudget() {
@@ -168,7 +164,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
-		
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -191,7 +186,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     
     @Test
     public void testModifyExpense() {
-    	
     	User user = new User("testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(1);
@@ -208,7 +202,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
-		
 		window.list("listNeeds").selectItem(0);
 		window.textBox("textFieldExpenseItemTitle").enterText("testtitlemod");
 		window.textBox("textFieldExpenseItemAmount").enterText("100");
@@ -219,7 +212,6 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		
 		assertThat(expenseItems.size()).isOne();
 		assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitlemod");
-		
 		assertThat(expenseItems.get(0).getAmount()).isEqualTo(100);
 		assertThat(expenseItems.get(0).getType()).isEqualTo(Type.WANTS);
 		assertThat(expenseItems.get(0).getBudgetId()).isOne();    	
@@ -235,15 +227,12 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
         assertThat(userRepository.findAll()).isEmpty();
     }
     
-    
     @Test
     public void testDeleteBudget() {
-    	
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(user.getId());
 		user.setBudgets(Arrays.asList(budget));
-		
 		
 		GuiActionRunner.execute(() -> {
 			GuiActionRunner.execute(() -> userController.addUser(user));
@@ -251,17 +240,14 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
-		
 		window.list("listBudgets").selectItem(0);
 		window.button(JButtonMatcher.withText("Delete Budget")).click();
-		
 		assertThat(budgetRepository.findAll()).isEmpty();
     	
     }
    
     @Test
     public void testDeleteExpense() {
-    	
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
 		budget.setUserId(1);

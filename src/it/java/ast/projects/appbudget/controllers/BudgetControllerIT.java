@@ -30,7 +30,6 @@ public class BudgetControllerIT {
 
     private static final MariaDBContainer<?> MARIA_DB_CONTAINER = new MariaDBContainer<>(
             DockerImageName.parse("mariadb:10.5.5"));
-
     private UserRepositorySqlImplementation userRepository;
     private BudgetRepositorySqlImplementation budgetRepository;
 
@@ -83,13 +82,14 @@ public class BudgetControllerIT {
 
     @Test
     public void testNewBudget() {
-    	
     	User u = new User("name","surname");
     	new UserRepositorySqlImplementation(factory).save(u);
     	Budget b = new Budget("testtitle", 2000);
     	b.setUserId(u.getId());
         budgetController.addBudget(b);
+        
         Budget budget = budgetRepository.findAll().get(0);
+        
         assertThat(budget.getTitle()).isEqualTo("testtitle");
         assertThat(budget.getIncomes()).isEqualTo(2000);
         verify(view).refreshBudgetsList(
@@ -106,14 +106,11 @@ public class BudgetControllerIT {
     	new UserRepositorySqlImplementation(factory).save(u);
         Budget budgetToUpdate = new Budget("testtitle", 2000);
         budgetToUpdate.setUserId(u.getId());
-        
         budgetController.addBudget(budgetToUpdate);
-
         budgetToUpdate.setTitle("testtitle2");
         budgetToUpdate.setIncomes(1000);
         
         budgetController.updateBudget(budgetToUpdate);
-
         Budget budget = budgetRepository.findAll().get(0);
         
         assertThat(budget.getTitle()).isEqualTo("testtitle2");
@@ -129,7 +126,6 @@ public class BudgetControllerIT {
 
     @Test
     public void testDeleteBudget() {
-    	
     	User u = new User("name","surname");
     	new UserRepositorySqlImplementation(factory).save(u);
         Budget budgetToDelete = new Budget("testtitle", 2000);
