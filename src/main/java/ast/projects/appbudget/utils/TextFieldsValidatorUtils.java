@@ -1,4 +1,4 @@
-package ast.project.appbudget.utils;
+package ast.projects.appbudget.utils;
 
 /**
  * This utility class provides methods for validating the content of various text fields 

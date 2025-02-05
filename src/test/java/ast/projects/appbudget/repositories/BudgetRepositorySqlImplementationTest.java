@@ -2,6 +2,7 @@ package ast.projects.appbudget.repositories;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -21,6 +22,9 @@ import javax.persistence.PersistenceException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 public class BudgetRepositorySqlImplementationTest {
 
@@ -211,9 +215,27 @@ public class BudgetRepositorySqlImplementationTest {
         assertThrows(OptimisticLockException.class, () -> budgetRepository.delete(budget));
         Session session = budgetRepository.getSession();
         
-        assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+        assertThat(session.isOpen()).isFalse();
+        
     }
+    
+    @Test
+	public void testDeleteBudgetRollback() {
+		SessionFactory spiedFactory = spy(sessionFactory);
+		Session spiedSession = spy(spiedFactory.openSession());
+		Transaction spiedTransaction = spy(spiedSession.getTransaction());
+		BudgetRepositorySqlImplementation spiedBudgetRepository = spy(budgetRepository);
+		Budget budget = saveBudgetManually(new Budget("testtitle1", 1000));
+		doReturn(spiedFactory).when(spiedBudgetRepository).getSessionFactory();
+		doReturn(spiedSession).when(spiedFactory).openSession();
+		doReturn(spiedTransaction).when(spiedSession).getTransaction();
+		doThrow(new RuntimeException("Simulated exception")).when(spiedTransaction).commit();
+		assertThrows(RuntimeException.class, () -> spiedBudgetRepository.delete(budget));
+		Session session = spiedBudgetRepository.getSession();
+		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+		assertThat(session.isOpen()).isFalse();
+	}
 
     @Test
     public void testUpdateBudget() {
@@ -229,6 +251,7 @@ public class BudgetRepositorySqlImplementationTest {
         assertThat(budgets).hasSize(1);
         assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
         assertThat(budgets.get(0).getIncomes()).isEqualTo(2000);
+		assertThat(session.isOpen()).isFalse();
     }
 
     @Test
@@ -242,4 +265,21 @@ public class BudgetRepositorySqlImplementationTest {
         assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
     }
+    
+    @Test
+	public void testUpdateBudgetRollback() {
+		SessionFactory spiedFactory = spy(sessionFactory);
+		Session spiedSession = spy(spiedFactory.openSession());
+		Transaction spiedTransaction = spy(spiedSession.getTransaction());
+		BudgetRepositorySqlImplementation spiedBudgetRepository = spy(budgetRepository);
+		Budget budget = saveBudgetManually(new Budget("testtitle1", 1000));
+		doReturn(spiedFactory).when(spiedBudgetRepository).getSessionFactory();
+		doReturn(spiedSession).when(spiedFactory).openSession();
+		doReturn(spiedTransaction).when(spiedSession).getTransaction();
+		doThrow(new RuntimeException("Simulated exception")).when(spiedTransaction).commit();
+		assertThrows(RuntimeException.class, () -> spiedBudgetRepository.update(budget));
+		Session session = spiedBudgetRepository.getSession();
+		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+		assertThat(session.isOpen()).isFalse();
+	}
 }

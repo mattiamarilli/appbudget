@@ -87,7 +87,6 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		saveExpenseItemManually(expense1);
 		saveExpenseItemManually(expense2);
 
-
 		application("ast.projects.appbudget.app.BudgetSwingApp").start();
 
 		window = WindowFinder.findFrame(new GenericTypeMatcher<JFrame>(JFrame.class) {
@@ -254,10 +253,36 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
 		
-		window.textBox("textFieldExpenseItemTitle").enterText("Benzina");
-		window.textBox("textFieldExpenseItemAmount").enterText("50");
+		window.textBox("textFieldExpenseItemTitle").setText("Benzina");
+		window.textBox("textFieldExpenseItemAmount").setText("50");
 		window.comboBox("comboBoxExpenseItemType").selectItem(0);
 		window.button(JButtonMatcher.withText("Add Expense")).click();
+		
+		assertThat(window.label("lblExpenseError").text()).contains("Error adding expense item");
+	}
+	
+	@Test
+	@GUITest
+	public void testModifyUserButtonSuccess() {
+		window.list("listUsers").selectItem(Pattern.compile(".*" + "Mario" + " " + "Rossi" + ".*"));
+		window.textBox("textFieldUserName").setText("Francesco");
+		window.textBox("textFieldUserSurname").setText("Neri");
+		window.button(JButtonMatcher.withText("Modify")).click();
+		
+		assertThat(window.list("listUsers").contents())
+		.anySatisfy(e -> assertThat(e).contains("Francesco Neri"));
+	}
+
+	@Test
+	@GUITest
+	public void testModifyUserButtonError() {
+		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
+		window.textBox("textFieldUserName").setText("Francesco");
+		window.textBox("textFieldUserSurname").setText("Neri");
+		deleteUserFromDatabase((long) 2);
+		window.button(JButtonMatcher.withText("Modify")).click();
+		
+		assertThat(window.label("lblUserError").text()).contains("Error updating user");
 	}
 	
 	@Test
@@ -266,8 +291,8 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
-		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
-		window.textBox("textFieldBudgetIncomes").enterText("3000");
+		window.textBox("textFieldBudgetTitle").setText("Luglio 2024");
+		window.textBox("textFieldBudgetIncomes").setText("3000");
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
 		
 		assertThat(window.list("listBudgets").contents())
@@ -280,13 +305,11 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(Pattern.compile(".*" + "Maggio 2024" + ".*"));
-		window.textBox("textFieldBudgetTitle").enterText("Luglio 2024");
-		window.textBox("textFieldBudgetIncomes").enterText("3000");
+		window.textBox("textFieldBudgetTitle").setText("Luglio 2024");
+		window.textBox("textFieldBudgetIncomes").setText("3000");
 		deleteBudgetFromDatabase((long) 1);
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
 		
-		assertThat(window.list("listBudgets").contents())
-		.anySatisfy(e -> assertThat(e).contains("Luglio 2024 - 3000.0$"));
 		assertThat(window.label("lblBudgetError").text()).contains("Error updating budget");
 	}
 
@@ -297,10 +320,9 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
 		window.list("listNeeds").selectItem(Pattern.compile(".*" + "Benzina" + ".*"));
-		window.textBox("textFieldExpenseItemTitle").enterText("Spesa");
-		window.textBox("textFieldExpenseItemAmount").enterText("50");
 		window.comboBox("comboBoxExpenseItemType").selectItem(0);
-		
+		window.textBox("textFieldExpenseItemTitle").setText("Spesa");
+		window.textBox("textFieldExpenseItemAmount").setText("50");
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 		
 		assertThat(window.list("listNeeds").contents())

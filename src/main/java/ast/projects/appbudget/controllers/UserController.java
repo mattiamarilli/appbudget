@@ -50,8 +50,29 @@ public class UserController {
 			userRepository.save(user);
 			budgetAppView.refreshUsersList(userRepository.findAll());
 			budgetAppView.resetUserErrorMessage();
+			budgetAppView.clearUserInputs();
 		} catch (Exception e) {
 			budgetAppView.showUserErrorMessage("Error adding new user");
+		}
+	}
+	
+	
+	/**
+	 * Updates an existing user in the system. Updates the user data in the
+	 * repository, updates the user interface, resets error messages, and clears
+	 * input fields after the update. The method is synchronized to ensure thread
+	 * safety during concurrent updates. Handles exceptions.
+	 *
+	 * @param user The user object with the updated information.
+	 */
+	public synchronized void updateUser(User user) {
+		try {
+			userRepository.update(user);
+			budgetAppView.refreshUsersList(userRepository.findAll());
+			budgetAppView.resetUserErrorMessage();
+			budgetAppView.clearUserInputs();
+		} catch (Exception e) {
+			budgetAppView.showUserErrorMessage("Error updating user");
 		}
 	}
 

@@ -80,6 +80,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.label(JLabelMatcher.withText("Surname"));
 		window.textBox("textFieldUserSurname").requireEnabled();
 		window.button(JButtonMatcher.withText("Add")).requireDisabled();
+		window.button(JButtonMatcher.withText("Modify")).requireDisabled();
 		window.list("listUsers");
 		window.button(JButtonMatcher.withText("Open Budgets")).requireDisabled();
 		window.button(JButtonMatcher.withText("Delete User")).requireDisabled();
@@ -119,6 +120,61 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		surnameTextBox.deleteText();
 		
 		window.button(JButtonMatcher.withText("Add")).requireDisabled();
+	}
+	
+	@Test
+	@GUITest
+	public void testModifyUserButtonShouldBeEnabledOnlyWhenTitleAndIncomesAreValidAndABudgetIsSelected() {
+		GuiActionRunner
+		.execute(() -> budgetAppView.getListUsersModel().addElement(new User(1, "testname", "testsurname")));
+
+		window.textBox("textFieldUserName").enterText("testname");
+		window.textBox("textFieldUserSurname").enterText("testsurname");
+		window.button(JButtonMatcher.withText("Modify")).requireDisabled();
+		
+		window.textBox("textFieldUserName").setText("");
+		window.textBox("textFieldUserSurname").setText("");
+		
+		window.list("listUsers").selectItem(0);
+		window.textBox("textFieldUserName").setText("");
+		window.textBox("textFieldUserSurname").enterText("testsurname");
+		window.button(JButtonMatcher.withText("Modify")).requireDisabled();
+		
+		window.textBox("textFieldUserName").setText("");
+		window.textBox("textFieldUserSurname").setText("");
+		
+		window.textBox("textFieldUserName").enterText("testname");
+		window.textBox("textFieldUserSurname").enterText(" ");
+		window.button(JButtonMatcher.withText("Modify")).requireDisabled();
+		
+		window.textBox("textFieldUserName").setText("");
+		window.textBox("textFieldUserSurname").setText("");
+		
+		window.textBox("textFieldUserName").enterText("testname");
+		window.textBox("textFieldUserSurname").enterText("testsurname");
+		window.button(JButtonMatcher.withText("Modify")).requireEnabled();
+		
+		window.textBox("textFieldUserName").deleteText();
+		window.textBox("textFieldUserSurname").deleteText();
+		
+		window.button(JButtonMatcher.withText("Modify")).requireDisabled();
+	}
+	
+	@Test
+	@GUITest
+	public void testUserSelectionShouldFillNameAndSurnameTextBox() {
+		GuiActionRunner
+		.execute(() -> budgetAppView.getListUsersModel().addElement(new User(1, "testname", "testsurname")));
+
+		window.list("listUsers").selectItem(0);
+
+		window.textBox("textFieldUserName").requireText("testname");
+		window.textBox("textFieldUserSurname").requireText("testsurname");
+		
+		window.list("listUsers").clearSelection();
+		
+		window.textBox("textFieldUserName").requireText("");
+		window.textBox("textFieldUserSurname").requireText("");
 	}
 
 	@Test
@@ -200,9 +256,9 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldBudgetTitle").setText("");
 		window.textBox("textFieldBudgetIncomes").setText("");
 		
-		window.textBox("textFieldBudgetTitle").enterText("");
-		window.textBox("textFieldBudgetIncomes").enterText("2000");
 		window.list("listBudgets").selectItem(0);
+		window.textBox("textFieldBudgetTitle").setText("");
+		window.textBox("textFieldBudgetIncomes").enterText("2000");
 		window.button(JButtonMatcher.withText("Modify Budget")).requireDisabled();
 		
 		window.textBox("textFieldBudgetTitle").setText("");
@@ -210,7 +266,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.textBox("textFieldBudgetTitle").enterText("testtitle");
 		window.textBox("textFieldBudgetIncomes").enterText(" ");
-		window.list("listBudgets").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Budget")).requireDisabled();
 		
 		window.textBox("textFieldBudgetTitle").setText("");
@@ -218,7 +273,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.textBox("textFieldBudgetTitle").enterText("testtitle");
 		window.textBox("textFieldBudgetIncomes").enterText("wrongincomes");
-		window.list("listBudgets").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Budget")).requireDisabled();
 		
 		window.textBox("textFieldBudgetTitle").setText("");
@@ -226,7 +280,6 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.textBox("textFieldBudgetTitle").enterText("testtitle");
 		window.textBox("textFieldBudgetIncomes").enterText("2000");
-		window.list("listBudgets").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Budget")).requireEnabled();
 		
 		window.textBox("textFieldBudgetTitle").deleteText();
@@ -476,48 +529,58 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 			budgetAppView.getTextFieldExpenseItemAmount().setEnabled(true);
 		});
 		
-		window.textBox("textFieldExpenseItemTitle").enterText("");
-		window.textBox("textFieldExpenseItemAmount").enterText("20");
 		window.list("listNeeds").selectItem(0);
-
+		window.textBox("textFieldExpenseItemTitle").setText("");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		
 		window.list("listNeeds").clearSelection();
 		
 		window.list("listWants").selectItem(0);
+		window.textBox("textFieldExpenseItemTitle").setText("");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		
 		window.list("listWants").clearSelection();
 		
 		window.list("listSavings").selectItem(0);
+		window.textBox("textFieldExpenseItemTitle").setText("");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		
 		window.list("listSavings").clearSelection();
 		
-		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
+		window.list("listNeeds").selectItem(0);
 		window.textBox("textFieldExpenseItemAmount").setText("");
-		
-		window.list("listNeeds").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		
 		window.list("listNeeds").clearSelection();
 		
 		window.list("listWants").selectItem(0);
+		window.textBox("textFieldExpenseItemAmount").setText("");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		
 		window.list("listWants").clearSelection();
 		
 		window.list("listSavings").selectItem(0);
+		window.textBox("textFieldExpenseItemAmount").setText("");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
+		
 		window.list("listSavings").clearSelection();
 		
+		window.list("listNeeds").selectItem(0);
 		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
 		window.textBox("textFieldExpenseItemAmount").setText("wrongamount");
 		
-		window.list("listNeeds").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
 		window.list("listNeeds").clearSelection();
 		
 		window.list("listWants").selectItem(0);
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").setText("wrongamount");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
 		window.list("listWants").clearSelection();
 		
 		window.list("listSavings").selectItem(0);
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").setText("wrongamount");
 		window.button(JButtonMatcher.withText("Modify Expense")).requireDisabled();
 		window.list("listSavings").clearSelection();
 		
@@ -596,6 +659,20 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.list("listWants").selectItem(0);
 		window.list("listSavings").selectItem(0);
 		window.list("listWants").requireNoSelection();
+	}
+	
+	@Test
+	@GUITest
+	public void testClearUserInputShouldClear() {
+		window.textBox("textFieldUserName").setText("test");
+		window.textBox("textFieldUserSurname").setText("test");
+		
+		GuiActionRunner.execute(() -> {
+			budgetAppView.clearUserInputs();
+		});
+		
+		window.textBox("textFieldUserName").requireText("");
+		window.textBox("textFieldUserSurname").requireText("");
 	}
 
 	@Test
@@ -754,7 +831,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testResetUserErrorMessageShouldResetTheUserErrorLabel() {
-		GuiActionRunner.execute(() -> budgetAppView.getLblErrorMessage().setText("test"));
+		GuiActionRunner.execute(() -> budgetAppView.getLblUserError().setText("test"));
 		GuiActionRunner.execute(() -> budgetAppView.resetUserErrorMessage());
 		window.label("lblUserError").requireText("");
 	}
@@ -848,8 +925,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemAmount").requireEnabled();
 		window.comboBox("comboBoxExpenseItemType").requireEnabled();
 		
-		window.textBox("textFieldBudgetTitle").requireText("");
-		window.textBox("textFieldBudgetIncomes").requireText("");
+		window.textBox("textFieldBudgetTitle").requireText("testtitle");
+		window.textBox("textFieldBudgetIncomes").requireText("2000.0");
 		window.textBox("textFieldExpenseItemTitle").requireText("");
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
@@ -908,8 +985,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.list("listBudgets").selectItem(1);
 		
-		window.textBox("textFieldBudgetTitle").requireText("");
-		window.textBox("textFieldBudgetIncomes").requireText("");
+		window.textBox("textFieldBudgetTitle").requireText("testtitle2");
+		window.textBox("textFieldBudgetIncomes").requireText("2000.0");
 		window.textBox("textFieldExpenseItemTitle").requireText("");
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
@@ -952,6 +1029,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 			budgetAppView.getBtnBudgetModify().setEnabled(true);
 			budgetAppView.getBtnBudgetAdd().setEnabled(true);
 			
+			budgetAppView.getLblUserError().setText("test");
 			budgetAppView.getLblExpenseError().setText("test");
 			budgetAppView.getLblBudgetError().setText("test");
 			budgetAppView.getLblUserDetails().setText("test");
@@ -974,6 +1052,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		
 		window.textBox("textFieldUserName").requireText("");
 		window.textBox("textFieldUserSurname").requireText("");
+		window.label("lblUserError").requireText("");
 
 		GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -1009,6 +1088,87 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemAmount").requireText("");
 		window.comboBox("comboBoxExpenseItemType").requireSelection(0);
 	}
+	
+	
+	@Test
+	@GUITest
+	public void testInsertInvalidUserFieldShouldShowErrorMessage() {
+		window.textBox("textFieldUserName").enterText("testname");
+		window.textBox("textFieldUserSurname").enterText(" ");
+		window.label("lblUserError").requireText("User fields not valid");
+	}
+	
+	@Test
+	@GUITest
+	public void testInsertValidUserFieldShouldResetErrorMessageLabel() {
+		GuiActionRunner.execute(() -> {
+			
+			budgetAppView.getLblUserError().setText("test");
+		});
+		
+		window.textBox("textFieldUserName").enterText("testname");
+		window.textBox("textFieldUserSurname").enterText("testusername");
+		window.label("lblUserError").requireText("");
+	}
+	
+	@Test
+	@GUITest
+	public void testInsertInvalidBudgetFieldShouldShowErrorMessage() {
+		GuiActionRunner.execute(() -> {
+			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+		});
+		window.textBox("textFieldBudgetTitle").enterText("testtitle");
+		window.textBox("textFieldBudgetIncomes").enterText("test");
+		window.label("lblBudgetError").requireText("Budget fields not valid");
+	}
+	
+	@Test
+	@GUITest
+	public void testInsertValidBudgetFieldShouldResetErrorMessageLabel() {
+		
+		GuiActionRunner.execute(() -> {
+			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+			budgetAppView.getLblBudgetError().setText("test");
+		});
+		
+		window.textBox("textFieldBudgetTitle").enterText("testtitle");
+		window.textBox("textFieldBudgetIncomes").enterText("200");
+		window.label("lblBudgetError").requireText("");
+	}
+	
+	@Test
+	@GUITest
+	public void testInsertInvalidExpenseFieldShouldShowErrorMessage() {
+		GuiActionRunner.execute(() -> {
+			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+			budgetAppView.getTextFieldExpenseItemTitle().setEnabled(true);
+			budgetAppView.getTextFieldExpenseItemAmount().setEnabled(true);
+		});
+		window.textBox("textFieldExpenseItemTitle").enterText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").enterText("test");
+		window.label("lblExpenseError").requireText("Expense item fields not valid");
+	}
+	
+	@Test
+	@GUITest
+	public void testInsertValidExpenseFieldShouldResetErrorMessageLabel() {
+		
+		GuiActionRunner.execute(() -> {
+			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
+			cardLayout.show(budgetAppView.getContentPane(), "budgetsCard");
+			budgetAppView.getTextFieldExpenseItemTitle().setEnabled(true);
+			budgetAppView.getTextFieldExpenseItemAmount().setEnabled(true);
+			budgetAppView.getLblExpenseError().setText("test");
+		});
+		
+		window.textBox("textFieldExpenseItemTitle").enterText("testtitle");
+		window.textBox("textFieldExpenseItemAmount").enterText("20");
+		window.label("lblExpenseError").requireText("");
+	}
+	
 	
 	@Test
 	@GUITest
@@ -1063,6 +1223,25 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 
         assertEquals("testname", userCaptor.getValue().getName());
         assertEquals("testsurname", userCaptor.getValue().getSurname());
+	}
+	
+	@Test
+	@GUITest
+	public void testModifyUserButtonShouldDelegateToUserControllerUpdateUser() {
+		GuiActionRunner
+		.execute(() -> budgetAppView.getListUsersModel().addElement(new User(1, "testname", "testsurname")));
+		
+		window.list("listUsers").selectItem(0);
+		window.textBox("textFieldUserName").setText("testname2");
+		window.textBox("textFieldUserSurname").setText("testsurname2");
+
+		window.button(JButtonMatcher.withText("Modify")).click();
+		
+		ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+		verify(userController).updateUser(userCaptor.capture());
+
+		assertEquals("testname2", userCaptor.getValue().getName());
+	    assertEquals("testsurname2", userCaptor.getValue().getSurname());
 	}
 
 	@Test
@@ -1127,7 +1306,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testModifyBudgetButtonShouldDelegateToBudgetControllerUpdateBudget() {
-		Budget budget = new Budget("testtitle", 2000);
+		Budget budget = new Budget("testtitle1", 2000);
 		budget.setExpenseItems(Arrays.asList());
 		
 		GuiActionRunner.execute(() -> {
@@ -1139,16 +1318,16 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		});
 		
 		window.list("listBudgets").selectItem(0);
-		window.textBox("textFieldBudgetTitle").enterText("testtitle");
-		window.textBox("textFieldBudgetIncomes").enterText("2000");
+		window.textBox("textFieldBudgetTitle").setText("testtitle2");
+		window.textBox("textFieldBudgetIncomes").setText("100");
 
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
 		
 		ArgumentCaptor<Budget> budgetCaptor = ArgumentCaptor.forClass(Budget.class);
 		verify(budgetController).updateBudget(budgetCaptor.capture());
 
-		assertEquals("testtitle", budgetCaptor.getValue().getTitle());
-	    assertEquals("2000.0", String.valueOf(budgetCaptor.getValue().getIncomes()));
+		assertEquals("testtitle2", budgetCaptor.getValue().getTitle());
+	    assertEquals("100.0", String.valueOf(budgetCaptor.getValue().getIncomes()));
 	}
 	
 	@Test
@@ -1205,7 +1384,7 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 	@Test
 	@GUITest
 	public void testModifyExpenseButtonShouldDelegateToExpenceItemControllerUpdateExpense() {
-		ExpenseItem expenseItem = new ExpenseItem("testtitle", Type.NEEDS, 10);
+		ExpenseItem expenseItem = new ExpenseItem("testtitle1", Type.NEEDS, 10);
 		
 		GuiActionRunner.execute(() -> {
 			CardLayout cardLayout = (CardLayout) budgetAppView.getContentPane().getLayout();
@@ -1218,11 +1397,12 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 			budgetAppView.getComboBoxExpenseItemType().setEnabled(true);
 		});
 		
-		window.textBox("textFieldExpenseItemTitle").enterText("testtitle");
-		window.textBox("textFieldExpenseItemAmount").enterText("10");
+		
+		window.list("listNeeds").selectItem(0);
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle2");
+		window.textBox("textFieldExpenseItemAmount").setText("20");
 		window.comboBox("comboBoxExpenseItemType").selectItem(1);
 
-		window.list("listNeeds").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 
 		verify(expenseItemController).updateExpenseItem(expenseItem);
@@ -1230,8 +1410,8 @@ public class BudgetAppSwingViewTest extends AssertJSwingJUnitTestCase {
 		ArgumentCaptor<ExpenseItem> expenseItemCaptor = ArgumentCaptor.forClass(ExpenseItem.class);
 		verify(expenseItemController).updateExpenseItem(expenseItemCaptor.capture());
 		
-		assertEquals("testtitle", expenseItemCaptor.getValue().getTitle());
-        assertEquals("10.0", String.valueOf(expenseItemCaptor.getValue().getAmount()));
+		assertEquals("testtitle2", expenseItemCaptor.getValue().getTitle());
+        assertEquals("20.0", String.valueOf(expenseItemCaptor.getValue().getAmount()));
         assertEquals(Type.WANTS, expenseItemCaptor.getValue().getType());
 	}
 }

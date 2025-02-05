@@ -1,6 +1,7 @@
-package ast.project.appbudget.utils;
+package ast.projects.appbudget.utils;
 
 import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TextFieldsValidatorUtilsTest {
@@ -64,6 +65,11 @@ public class TextFieldsValidatorUtilsTest {
     public void testValidateBudgetTitleTextFieldWithValidValue() {
         assertThat(TextFieldsValidatorUtils.validateBudgetTitleTextField("Monthly Budget")).isTrue();
     }
+    
+    @Test
+    public void testValidateBudgetIncomesTextFieldvalidValue() {
+        assertThat(TextFieldsValidatorUtils.validateBudgetIncomesTextField("1.0")).isTrue();
+    }
 
     @Test
     public void testValidateBudgetIncomesTextFieldWithNullValue() {
@@ -94,6 +100,7 @@ public class TextFieldsValidatorUtilsTest {
     public void testValidateBudgetIncomesTextFieldWithZeroValue() {
         assertThat(TextFieldsValidatorUtils.validateBudgetIncomesTextField("0")).isFalse();
     }
+    
 
     @Test
     public void testValidateBudgetIncomesTextFieldWithLessThanOneValue() {

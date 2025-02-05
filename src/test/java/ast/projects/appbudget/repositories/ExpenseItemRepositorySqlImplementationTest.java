@@ -2,6 +2,7 @@ package ast.projects.appbudget.repositories;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -22,6 +23,9 @@ import javax.persistence.PersistenceException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 public class ExpenseItemRepositorySqlImplementationTest {
 
@@ -232,6 +236,23 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		assertThat(session.isOpen()).isFalse();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
 	}
+	
+    @Test
+	public void testDeleteExpenseItemRollback() {
+		SessionFactory spiedFactory = spy(sessionFactory);
+		Session spiedSession = spy(spiedFactory.openSession());
+		Transaction spiedTransaction = spy(spiedSession.getTransaction());
+		ExpenseItemRepositorySqlImplementation spiedExpenseItemRepository = spy(expenseItemRepository);
+		ExpenseItem expenseItem = saveExpenseItemManually(new ExpenseItem("testtitle1", Type.NEEDS, 50));
+		doReturn(spiedFactory).when(spiedExpenseItemRepository).getSessionFactory();
+		doReturn(spiedSession).when(spiedFactory).openSession();
+		doReturn(spiedTransaction).when(spiedSession).getTransaction();
+		doThrow(new RuntimeException("Simulated exception")).when(spiedTransaction).commit();
+		assertThrows(RuntimeException.class, () -> spiedExpenseItemRepository.delete(expenseItem));
+		Session session = spiedExpenseItemRepository.getSession();
+		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+		assertThat(session.isOpen()).isFalse();
+	}
 
 	@Test
 	public void testUpdateExpenseItem() {
@@ -257,5 +278,22 @@ public class ExpenseItemRepositorySqlImplementationTest {
 		
 		assertThat(session.isOpen()).isFalse();
 		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+	}
+	
+    @Test
+	public void testUpdateExpenseItemRollback() {
+		SessionFactory spiedFactory = spy(sessionFactory);
+		Session spiedSession = spy(spiedFactory.openSession());
+		Transaction spiedTransaction = spy(spiedSession.getTransaction());
+		ExpenseItemRepositorySqlImplementation spiedExpenseItemRepository = spy(expenseItemRepository);
+		ExpenseItem expenseItem = saveExpenseItemManually(new ExpenseItem("testtitle1", Type.NEEDS, 50));
+		doReturn(spiedFactory).when(spiedExpenseItemRepository).getSessionFactory();
+		doReturn(spiedSession).when(spiedFactory).openSession();
+		doReturn(spiedTransaction).when(spiedSession).getTransaction();
+		doThrow(new RuntimeException("Simulated exception")).when(spiedTransaction).commit();
+		assertThrows(RuntimeException.class, () -> spiedExpenseItemRepository.update(expenseItem));
+		Session session = spiedExpenseItemRepository.getSession();
+		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+		assertThat(session.isOpen()).isFalse();
 	}
 }

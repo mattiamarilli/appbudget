@@ -5,6 +5,7 @@ import ast.projects.appbudget.models.ExpenseItem;
 import ast.projects.appbudget.models.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -20,6 +21,9 @@ import javax.persistence.PersistenceException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 public class UserRepositorySqlImplementationTest {
 
@@ -37,6 +41,7 @@ public class UserRepositorySqlImplementationTest {
                 .setProperty("hibernate.connection.username", "sa")
                 .setProperty("hibernate.connection.password", "")
                 .setProperty("hibernate.connection.autocommit", "false")
+                .setProperty("hibernate.current_session_context_class", "thread")
                 .addAnnotatedClass(User.class)
                 .addAnnotatedClass(Budget.class)
                 .addAnnotatedClass(ExpenseItem.class)
@@ -157,7 +162,76 @@ public class UserRepositorySqlImplementationTest {
         assertThrows(OptimisticLockException.class, () -> userRepository.delete(user));
         Session session = userRepository.getSession();
         
-        assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+        assertThat(session.isOpen()).isFalse();
+       
     }
+    
+    @Test
+	public void testDeleteUserRollback() {
+		SessionFactory spiedFactory = spy(sessionFactory);
+		Session spiedSession = spy(spiedFactory.openSession());
+		Transaction spiedTransaction = spy(spiedSession.getTransaction());
+		UserRepositorySqlImplementation spiedUserRepository = spy(userRepository);
+		User user = saveUserManually("testname1", "testsurname1");
+		doReturn(spiedFactory).when(spiedUserRepository).getSessionFactory();
+		doReturn(spiedSession).when(spiedFactory).openSession();
+		doReturn(spiedTransaction).when(spiedSession).getTransaction();
+		doThrow(new RuntimeException("Simulated exception")).when(spiedTransaction).commit();
+		assertThrows(RuntimeException.class, () -> spiedUserRepository.delete(user));
+		Session session = spiedUserRepository.getSession();
+		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+		assertThat(session.isOpen()).isFalse();
+	}
+    
+    @Test
+    public void testUpdateUser() {
+    	User user = saveUserManually("testname1", "testsurname1");
+        user.setName("testname2");
+        user.setSurname("testsurname2");
+        
+        userRepository.update(user);
+        List<User> users = getUsersFromDatabaseManually();
+        Session session = userRepository.getSession();
+
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+        assertThat(users).hasSize(1);
+        assertThat(users.get(0).getName()).isEqualTo("testname2");
+        assertThat(users.get(0).getSurname()).isEqualTo("testsurname2");
+        assertThat(session.isOpen()).isFalse();
+    }
+
+    @Test
+    public void testUpdateUserThatIsNotInDB() {
+        User user = new User("testname1", "testsurname1");
+        user.setId(1);
+        
+        assertThrows(OptimisticLockException.class, () -> userRepository.update(user));
+        Session session = userRepository.getSession();
+        
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+        assertThat(session.isOpen()).isFalse();
+    }
+    
+    @Test
+	public void testUpdateUserRollback() {
+		SessionFactory spiedFactory = spy(sessionFactory);
+		Session spiedSession = spy(spiedFactory.openSession());
+		
+		Transaction spiedTransaction = spy(spiedSession.getTransaction());
+		UserRepositorySqlImplementation spiedUserRepository = spy(userRepository);
+		
+		User user = saveUserManually("testname1", "testsurname1");
+		
+		doReturn(spiedFactory).when(spiedUserRepository).getSessionFactory();
+		doReturn(spiedSession).when(spiedFactory).openSession();
+		doReturn(spiedTransaction).when(spiedSession).getTransaction();
+		
+		doThrow(new RuntimeException("Simulated exception")).when(spiedTransaction).commit();
+		
+		assertThrows(RuntimeException.class, () -> spiedUserRepository.update(user));
+		Session session = spiedUserRepository.getSession();
+		assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+		assertThat(session.isOpen()).isFalse();
+	}
 }

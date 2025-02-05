@@ -82,11 +82,11 @@ public class BudgetControllerIT {
 
     @Test
     public void testNewBudget() {
-    	User u = new User("name","surname");
-    	new UserRepositorySqlImplementation(factory).save(u);
-    	Budget b = new Budget("testtitle", 2000);
-    	b.setUserId(u.getId());
-        budgetController.addBudget(b);
+    	User user = new User("name","surname");
+    	userRepository.save(user);
+    	Budget budgetToSave = new Budget("testtitle", 2000);
+    	budgetToSave.setUserId(user.getId());
+        budgetController.addBudget(budgetToSave);
         
         Budget budget = budgetRepository.findAll().get(0);
         
@@ -102,11 +102,11 @@ public class BudgetControllerIT {
     
     @Test
     public void testUpdateBudget() {
-    	User u = new User("name","surname");
-    	new UserRepositorySqlImplementation(factory).save(u);
+    	User user = new User("name","surname");
+    	userRepository.save(user);
         Budget budgetToUpdate = new Budget("testtitle", 2000);
-        budgetToUpdate.setUserId(u.getId());
-        budgetController.addBudget(budgetToUpdate);
+        budgetToUpdate.setUserId(user.getId());
+        budgetRepository.save(budgetToUpdate);
         budgetToUpdate.setTitle("testtitle2");
         budgetToUpdate.setIncomes(1000);
         
@@ -126,11 +126,11 @@ public class BudgetControllerIT {
 
     @Test
     public void testDeleteBudget() {
-    	User u = new User("name","surname");
-    	new UserRepositorySqlImplementation(factory).save(u);
+    	User user = new User("name","surname");
+    	userRepository.save(user);
         Budget budgetToDelete = new Budget("testtitle", 2000);
-        budgetController.addBudget(budgetToDelete);
-        budgetToDelete.setUserId(u.getId());
+        budgetRepository.save(budgetToDelete);
+        budgetToDelete.setUserId(user.getId());
 
         budgetController.deleteBudget(budgetToDelete);
 
@@ -140,12 +140,12 @@ public class BudgetControllerIT {
     
     @Test
     public void testAllBudgetsByUser() {
-    	User u = new User("name","surname");
-    	userRepository.save(u);
-    	Budget b = new Budget("testtitle", 1000);
-    	b.setUserId(u.getId());
-        budgetRepository.save(b);
-        budgetController.allBudgetsByUser(u);
+    	User user = new User("name","surname");
+    	userRepository.save(user);
+    	Budget budget = new Budget("testtitle", 1000);
+    	budget.setUserId(user.getId());
+        budgetRepository.save(budget);
+        budgetController.allBudgetsByUser(user);
         verify(view).refreshBudgetsList(
                 argThat(budgets -> budgets.size() == 1 &&
                         budgets.get(0).getId() == 1 &&

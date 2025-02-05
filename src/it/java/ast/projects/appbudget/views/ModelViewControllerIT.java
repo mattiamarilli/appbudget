@@ -159,6 +159,25 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     }
     
     @Test
+    public void testModifyUser() {
+    	User user = new User(1, "testname1", "testsurname1");
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.textBox("textFieldUserName").setText("testname2");
+        window.textBox("textFieldUserSurname").setText("testsurname2");
+        window.button(JButtonMatcher.withText("Modify")).click();
+
+        List<User> users = userRepository.findAll();
+        assertThat(users.size()).isOne();
+        assertThat(users.get(0).getName()).isEqualTo("testname2");
+        assertThat(users.get(0).getSurname()).isEqualTo("testsurname2");
+    }
+    
+    @Test
     public void testModifyBudget() {
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);
@@ -172,8 +191,8 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
-		window.textBox("textFieldBudgetTitle").enterText("testtitle2");
-		window.textBox("textFieldBudgetIncomes").enterText("2000");
+		window.textBox("textFieldBudgetTitle").setText("testtitle2");
+		window.textBox("textFieldBudgetIncomes").setText("2000");
 
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
 		
@@ -203,8 +222,8 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
 		window.list("listNeeds").selectItem(0);
-		window.textBox("textFieldExpenseItemTitle").enterText("testtitlemod");
-		window.textBox("textFieldExpenseItemAmount").enterText("100");
+		window.textBox("textFieldExpenseItemTitle").setText("testtitlemod");
+		window.textBox("textFieldExpenseItemAmount").setText("100");
 		window.comboBox("comboBoxExpenseItemType").selectItem(1);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 		
