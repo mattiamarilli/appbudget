@@ -11,6 +11,7 @@ public interface BudgetAppView{
 	void refreshUsersList(List<User> users);
 	void showUserErrorMessage(String message);
 	void resetUserErrorMessage();
+	void clearUserInputs();
 	
 	void refreshBudgetsList(List<Budget> budgets);
 	void showBudgetErrorMessage(String message);

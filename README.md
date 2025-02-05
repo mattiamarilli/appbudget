@@ -10,7 +10,7 @@ Made by [Mattia Marilli](https://github.com/mattiamarilli)
 
 ### Get started
 
-Clone the repository and navigate to the project folder and run the project:
+Clone the repository and navigate to the project folder:
 
 ```sh
 $ git clone https://github.com/mattiamarilli/appbudget.git
