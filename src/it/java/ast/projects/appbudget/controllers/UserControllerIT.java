@@ -92,11 +92,32 @@ public class UserControllerIT {
                         users.get(0).getSurname().equals("test1surname")
                 ));
     }
+    
+    @Test
+    public void testUpdateUser() {
+        User userToUpdate = new User("testname", "testsurname");
+        userRepository.save(userToUpdate);
+        userToUpdate.setName("testname");
+        userToUpdate.setSurname("testsurname");
+        
+        userController.updateUser(userToUpdate);
+        User user = userRepository.findAll().get(0);
+        
+        assertThat(user.getName()).isEqualTo("testname");
+        assertThat(user.getSurname()).isEqualTo("testsurname");
+        
+        verify(view).refreshUsersList(
+                argThat(users -> users.size() == 1 &&
+                        users.get(0).getId() == 1 &&
+                        users.get(0).getName().equals("testname") &&
+                        users.get(0).getSurname().equals("testsurname")
+                ));
+    }
 
     @Test
     public void testDeleteUser() {
         User userToDelete = new User(1, "test1name", "test1surname");
-        userController.addUser(new User("test1name", "test1surname"));
+        userRepository.save(userToDelete);
 
         userController.deleteUser(userToDelete);
 

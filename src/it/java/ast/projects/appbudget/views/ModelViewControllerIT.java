@@ -159,6 +159,25 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
     }
     
     @Test
+    public void testModifyUser() {
+    	User user = new User(1, "testname1", "testsurname1");
+		
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.textBox("textFieldUserName").enterText("testname2");
+        window.textBox("textFieldUserSurname").enterText("testsurname2");
+        window.button(JButtonMatcher.withText("Modify")).click();
+
+        List<User> users = userRepository.findAll();
+        assertThat(users.size()).isOne();
+        assertThat(users.get(0).getName()).isEqualTo("testname2");
+        assertThat(users.get(0).getSurname()).isEqualTo("testsurname2");
+    }
+    
+    @Test
     public void testModifyBudget() {
     	User user = new User(1, "testname", "testsurname");
 		Budget budget = new Budget("testtitle", 1000);

@@ -80,6 +80,29 @@ public class UserControllerTest {
     }
     
     @Test
+    public void testUpdateUserSuccess() {
+        User user = new User(1, "name", "surname");
+        when(userRepository.findAll()).thenReturn(Arrays.asList(user));
+        
+        userController.updateUser(user);
+
+        verify(userRepository).update(user);
+        verify(budgetAppView).refreshUsersList(userRepository.findAll());
+        verify(budgetAppView).resetUserErrorMessage();
+        verify(budgetAppView).clearUserInputs();
+    }
+
+    @Test
+    public void testUpdateUserFailure() {
+    	User user = new User(1, "name", "surname");
+        doThrow(new RuntimeException()).when(userRepository).update(any(User.class));
+        
+        userController.updateUser(user);
+        
+        verify(budgetAppView).showUserErrorMessage("Error updating user");
+    }
+    
+    @Test
     public void testDeleteUserSuccess() {
         User user = new User("testname", "testsurname");
         when(userRepository.findAll()).thenReturn(Arrays.asList());

@@ -74,6 +74,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	private JButton btnBudgetsOpen;
 	private JButton btnUserDelete;
 	private JButton btnUserAdd;
+	private JButton btnUserModify;
 	private JButton btnExpenseAdd;
 	private JButton btnExpenseDelete;
 	private JButton btnExpenseModify;
@@ -93,7 +94,6 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	private JLabel lblUserDetails;
 	private JLabel lblExpenseError;
 	private JLabel lblBudgetError;
-
 	private JLabel lblUserError;
 	private JLabel lblUserName;
 	private JLabel lblUserSurname;
@@ -102,10 +102,12 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	private JLabel lblExpenseItemTitle;
 	private JLabel lblExpenseItemAmount;
 	private JLabel lblExpenseItemType;
-	
 	private JLabel labelNeedsInfo;
 	private JLabel lblWantsInfo;
 	private JLabel lblSavingsInfo;
+	
+	
+	
 	
 	// Combobox
 	private JComboBox<ast.projects.appbudget.models.Type> comboBoxExpenseItemType;
@@ -123,7 +125,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		super.setTitle("AppBudget");
 		super.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		super.setBounds(100, 100, 855, 499);
-		super.setSize(855, 499);
+		super.setSize(855, 560);
 		super.setResizable(false);
 		
 		//Panel
@@ -136,10 +138,10 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		panelUsers.setName("panelUsers");
 		contentPane.add(panelUsers, "usersCard");
 		GridBagLayout gblPanelUsers = new GridBagLayout();
-		gblPanelUsers.columnWidths = new int[] { 76, 323, 38, 350, 86, 0 };
-		gblPanelUsers.rowHeights = new int[] { 30, 29, 328, 29, 92, 0 };
+		gblPanelUsers.columnWidths = new int[] { 73, 323, 38, 350, 86, 0 };
+		gblPanelUsers.rowHeights = new int[] { 30, 0, 29, 328, 29, 92, 0 };
 		gblPanelUsers.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
-		gblPanelUsers.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gblPanelUsers.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		panelUsers.setLayout(gblPanelUsers);
 		
 		panelBudgets = new JPanel();
@@ -194,7 +196,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbcLblUserError.fill = GridBagConstraints.BOTH;
 		gbcLblUserError.gridwidth = 5;
 		gbcLblUserError.gridx = 0;
-		gbcLblUserError.gridy = 4;
+		gbcLblUserError.gridy = 5;
 		panelUsers.add(lblUserError, gbcLblUserError);
 		
 		lblUserDetails = new JLabel("");
@@ -267,13 +269,20 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		panelBudgets.add(lblSavingsInfo, gbcLblSavingsInfo);
 		
 		//Text fields
-		// DocumentListener for enabling btnUserAdd
-		DocumentListener btnUserAddEnabler = new DocumentListener() {
+		// DocumentListener for enabling btnUserAdd and btnUserModify
+		DocumentListener btnUserEnabler = new DocumentListener() {
 		    private void updateButtonState() {
 		        btnUserAdd.setEnabled(
 		            TextFieldsValidatorUtils.validateUserNameTextField(textFieldUserName.getText()) &&
 		            TextFieldsValidatorUtils.validateUserSurnameTextField(textFieldUserSurname.getText())
 		        );
+		        
+		        btnUserModify.setEnabled(
+						listUsers.getSelectedIndex() != -1
+						&& TextFieldsValidatorUtils.validateUserNameTextField(textFieldUserName.getText())
+						&& TextFieldsValidatorUtils.validateUserSurnameTextField(textFieldUserSurname.getText())
+						);
+		        
 		    }
 
 		    @Override
@@ -357,7 +366,6 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		        // override this method as part of the DocumentListener interface.
 		    }
 		};
-
 		
 		textFieldUserName = new JTextField();
 		textFieldUserName.setName("textFieldUserName");
@@ -369,8 +377,8 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbcTextFieldUserName.gridy = 1;
 		panelUsers.add(textFieldUserName, gbcTextFieldUserName);
 		textFieldUserName.setColumns(10);
-		textFieldUserName.getDocument().addDocumentListener(btnUserAddEnabler);
-
+		textFieldUserName.getDocument().addDocumentListener(btnUserEnabler);
+		
 		textFieldUserSurname = new JTextField();
 		textFieldUserSurname.setName("textFieldUserSurname");
 		GridBagConstraints gbcTextFieldUserSurname = new GridBagConstraints();
@@ -381,7 +389,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbcTextFieldUserSurname.gridy = 1;
 		panelUsers.add(textFieldUserSurname, gbcTextFieldUserSurname);
 		textFieldUserSurname.setColumns(10);
-		textFieldUserSurname.getDocument().addDocumentListener(btnUserAddEnabler);
+		textFieldUserSurname.getDocument().addDocumentListener(btnUserEnabler);
 
 		textFieldBudgetTitle = new JTextField();
 		textFieldBudgetTitle.setName("textFieldBudgetTitle");
@@ -421,18 +429,33 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		comboBoxExpenseItemType.setEnabled(false);
 		comboBoxExpenseItemType.setBounds(35, 57, 135, 27);
 		panelExpenseForm.add(comboBoxExpenseItemType);
-		 
+		
 		//Buttons
 		btnUserAdd = new JButton("Add");
 		btnUserAdd.setName("btnUserAdd");
 		btnUserAdd.setEnabled(false);
 		GridBagConstraints gbcBtnUserAdd = new GridBagConstraints();
 		gbcBtnUserAdd.fill = GridBagConstraints.BOTH;
-		gbcBtnUserAdd.insets = new Insets(0, 0, 5, 0);
-		gbcBtnUserAdd.gridx = 4;
-		gbcBtnUserAdd.gridy = 1;
+		gbcBtnUserAdd.insets = new Insets(0, 0, 5, 5);
+		gbcBtnUserAdd.gridx = 1;
+		gbcBtnUserAdd.gridy = 2;
 		panelUsers.add(btnUserAdd, gbcBtnUserAdd);
 		btnUserAdd.addActionListener(e -> userController.addUser(new User(textFieldUserName.getText(), textFieldUserSurname.getText())));
+		
+		btnUserModify = new JButton("Modify");
+		btnUserModify.setEnabled(false);
+		GridBagConstraints gbcBtnUserModify = new GridBagConstraints();
+		gbcBtnUserModify.fill = GridBagConstraints.BOTH;
+		gbcBtnUserModify.insets = new Insets(0, 0, 5, 5);
+		gbcBtnUserModify.gridx = 3;
+		gbcBtnUserModify.gridy = 2;
+		panelUsers.add(btnUserModify, gbcBtnUserModify);
+		btnUserModify.addActionListener(e -> {
+		    User userToModify = listUsers.getSelectedValue();
+		    userToModify.setName(textFieldUserName.getText());
+		    userToModify.setSurname(textFieldUserSurname.getText());
+		    userController.updateUser(userToModify);
+		});
 		
 		btnUserDelete = new JButton("Delete User");
 		btnUserDelete.setName("btnUserDelete");
@@ -441,7 +464,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbcBtnUserDelete.anchor = GridBagConstraints.NORTHWEST;
 		gbcBtnUserDelete.insets = new Insets(0, 0, 5, 5);
 		gbcBtnUserDelete.gridx = 3;
-		gbcBtnUserDelete.gridy = 3;
+		gbcBtnUserDelete.gridy = 4;
 		panelUsers.add(btnUserDelete, gbcBtnUserDelete);
 		btnUserDelete.addActionListener(e -> userController.deleteUser(listUsers.getSelectedValue()));
 		
@@ -452,7 +475,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbcBtnBudgetsOpen.anchor = GridBagConstraints.NORTHEAST;
 		gbcBtnBudgetsOpen.insets = new Insets(0, 0, 5, 5);
 		gbcBtnBudgetsOpen.gridx = 1;
-		gbcBtnBudgetsOpen.gridy = 3;
+		gbcBtnBudgetsOpen.gridy = 4;
 		panelUsers.add(btnBudgetsOpen, gbcBtnBudgetsOpen);
 		btnBudgetsOpen.addActionListener(e -> openUserBudgets(listUsers.getSelectedValue()));
 		
@@ -541,13 +564,25 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		gbcListUsers.insets = new Insets(0, 0, 5, 5);
 		gbcListUsers.gridwidth = 3;
 		gbcListUsers.gridx = 1;
-		gbcListUsers.gridy = 2;
+		gbcListUsers.gridy = 3;
 		panelUsers.add(listUsers, gbcListUsers);
 		listUsers.addListSelectionListener(
 				e -> {
 					btnBudgetsOpen.setEnabled(listUsers.getSelectedIndex() != -1);
 					btnUserDelete.setEnabled(listUsers.getSelectedIndex() != -1);
 					currentUser = listUsers.getSelectedValue();
+					
+					btnUserModify.setEnabled(
+							listUsers.getSelectedIndex() != -1
+							&& TextFieldsValidatorUtils.validateUserNameTextField(textFieldUserName.getText())
+							&& TextFieldsValidatorUtils.validateUserSurnameTextField(textFieldUserSurname.getText())
+							);
+					
+				if(currentUser != null)
+				{
+					textFieldUserName.setText(currentUser.getName());
+					textFieldUserSurname.setText(currentUser.getSurname());
+				}
 		});
 
 		listBudgets = new JList<>(listBudgetsModel);
@@ -669,7 +704,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	}
 
 	// Package private getter for testing purpose
-	JLabel getLblErrorMessage() {
+	JLabel getLblUserError() {
 		return lblUserError;
 	}
 
@@ -855,6 +890,15 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 	 * Clears the input fields used for entering budget information.
 	 */
 	@Override
+	public void clearUserInputs() {
+		textFieldUserName.setText("");
+		textFieldUserSurname.setText("");
+	}
+	
+	/**
+	 * Clears the input fields used for entering budget information.
+	 */
+	@Override
 	public void clearBudgetInputs() {
 		textFieldBudgetTitle.setText("");
 		textFieldBudgetIncomes.setText("");
@@ -990,6 +1034,7 @@ public class BudgetAppSwingView extends JFrame implements BudgetAppView {
 		btnBudgetModify.setEnabled(false);
 		btnBudgetAdd.setEnabled(false);
 
+		lblUserError.setText("");
 		lblExpenseError.setText("");
 		lblBudgetError.setText("");
 		lblUserDetails.setText("");

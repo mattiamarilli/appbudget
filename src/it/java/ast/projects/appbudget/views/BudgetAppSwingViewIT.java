@@ -287,6 +287,40 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("lblExpenseError").requireText("Error adding expense item");
 
 	}
+	
+	@Test
+	@GUITest
+	public void testModifyUserButtonSuccess() {
+		User user = new User(1, "testname1", "testsurname1");
+
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.textBox("textFieldUserName").enterText("testname2");
+		window.textBox("textFieldUserSurname").enterText("testsurname2");
+		window.button(JButtonMatcher.withText("Modify")).click();
+		assertThat(window.list("listUsers").contents()).containsExactly("testname2 testsurname2");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyUserButtonError() {
+		User userFake = new User("testname", "testsurname");
+		
+		GuiActionRunner.execute(() -> {
+			budgetAppView.getListUsersModel().addElement(userFake);
+
+		});
+		
+		window.list("listUsers").selectItem(0);
+		
+		window.textBox("textFieldUserName").enterText("testname2");
+		window.textBox("textFieldUserSurname").enterText("testsurname2");
+		window.button(JButtonMatcher.withText("Modify")).click();
+		window.label("lblUserError").requireText("Error updating user");
+	}
 
 	@Test
 	@GUITest

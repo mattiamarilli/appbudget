@@ -87,7 +87,6 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		saveExpenseItemManually(expense1);
 		saveExpenseItemManually(expense2);
 
-
 		application("ast.projects.appbudget.app.BudgetSwingApp").start();
 
 		window = WindowFinder.findFrame(new GenericTypeMatcher<JFrame>(JFrame.class) {
@@ -258,6 +257,32 @@ public class BudgetAppSwingE2E extends AssertJSwingJUnitTestCase {
 		window.textBox("textFieldExpenseItemAmount").enterText("50");
 		window.comboBox("comboBoxExpenseItemType").selectItem(0);
 		window.button(JButtonMatcher.withText("Add Expense")).click();
+	}
+	
+	@Test
+	@GUITest
+	public void testModifyUserButtonSuccess() {
+		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
+		window.textBox("textFieldUserName").enterText("Francesco");
+		window.textBox("textFieldUserSurname").enterText("Neri");
+		window.button(JButtonMatcher.withText("Modify")).click();
+		
+		assertThat(window.list("listBudgets").contents())
+		.anySatisfy(e -> assertThat(e).contains("Francesco Neri"));
+	}
+
+	@Test
+	@GUITest
+	public void testModifyUserButtonError() {
+		window.list("listUsers").selectItem(Pattern.compile(".*" + "Luigi" + " " + "Bianchi" + ".*"));
+		window.textBox("textFieldUserName").enterText("Francesco");
+		window.textBox("textFieldUserSurname").enterText("Neri");
+		deleteUserFromDatabase((long) 2);
+		window.button(JButtonMatcher.withText("Modify")).click();
+		
+		assertThat(window.list("listUsers").contents())
+		.anySatisfy(e -> assertThat(e).contains("Francesco Neri"));
+		assertThat(window.label("lblUserError").text()).contains("Error updating user");
 	}
 	
 	@Test

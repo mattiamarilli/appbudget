@@ -85,14 +85,31 @@ public class ExpenseItemRepositoryTestcontainersIT {
 
     @Test
     public void testSaveExpenseItem() {
-        ExpenseItem item1 = addTestExpenseItemToDatabase("testtitle", Type.NEEDS, 10);
+        ExpenseItem expense = addTestExpenseItemToDatabase("testtitle", Type.NEEDS, 10);
 
         List<ExpenseItem> expenseItems = expenseItemRepository.findAll();
 
         assertThat(expenseItems).hasSize(1);
-        assertThat(expenseItems.get(0).getTitle()).isEqualTo(item1.getTitle());
-        assertThat(expenseItems.get(0).getAmount()).isEqualTo(item1.getAmount());
-        assertThat(expenseItems.get(0).getType()).isEqualTo(item1.getType());
+        assertThat(expenseItems.get(0).getTitle()).isEqualTo(expense.getTitle());
+        assertThat(expenseItems.get(0).getAmount()).isEqualTo(expense.getAmount());
+        assertThat(expenseItems.get(0).getType()).isEqualTo(expense.getType());
+    }
+    
+    @Test
+    public void testModifyExpense() {
+    	ExpenseItem expense = addTestExpenseItemToDatabase("testtitle", Type.NEEDS, 10);
+
+        expense.setTitle("testtitle2");
+        expense.setAmount(20);
+        expense.setType(Type.SAVINGS);
+
+        expenseItemRepository.update(expense);
+        List<ExpenseItem> expenseItems = expenseItemRepository.findAll();
+
+        assertThat(expenseItems).hasSize(1);
+        assertThat(expenseItems.get(0).getTitle()).isEqualTo("testtitle2");
+        assertThat(expenseItems.get(0).getAmount()).isEqualTo(20);
+        assertThat(expenseItems.get(0).getType()).isEqualTo(Type.SAVINGS);
     }
 
     @Test

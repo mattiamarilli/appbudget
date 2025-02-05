@@ -65,6 +65,29 @@ public class UserRepositorySqlImplementation implements UserRepository {
 			newSession.close();
 		}
 	}
+	
+	
+	/**
+	 * Updates a user in the database.
+	 * 
+	 * @param user The user to update.
+	 * @throws Exception If an error occurs while updating the budget.
+	 */
+	@Override
+	public void update(User user) {
+		Session newSession = getSessionFactory().openSession();
+		session = newSession;
+		try {
+			newSession.beginTransaction();
+			newSession.update(user);
+			newSession.getTransaction().commit();
+		} catch (Exception e) {
+			newSession.getTransaction().rollback();
+			throw e;
+		} finally {
+			newSession.close();
+		}
+	}
 
 	/**
 	 * Deletes a user from the database.

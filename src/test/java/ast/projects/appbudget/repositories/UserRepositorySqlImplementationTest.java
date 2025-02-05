@@ -160,4 +160,32 @@ public class UserRepositorySqlImplementationTest {
         assertThat(session.isOpen()).isFalse();
         assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
     }
+    
+    @Test
+    public void testUpdateUser() {
+    	User user = saveUserManually("testname1", "testsurname1");
+        user.setName("testname2");
+        user.setSurname("testsurname2");
+        
+        userRepository.update(user);
+        List<User> users = getUsersFromDatabaseManually();
+        Session session = userRepository.getSession();
+
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.COMMITTED);
+        assertThat(users).hasSize(1);
+        assertThat(users.get(0).getName()).isEqualTo("testname2");
+        assertThat(users.get(0).getSurname()).isEqualTo("testsurname2");
+    }
+
+    @Test
+    public void testUpdateUserThatIsNotInDB() {
+        User user = new User("testname1", "testsurname1");
+        user.setId(1);
+        
+        assertThrows(OptimisticLockException.class, () -> userRepository.update(user));
+        Session session = userRepository.getSession();
+        
+        assertThat(session.isOpen()).isFalse();
+        assertThat(session.getTransaction().getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
+    }
 }
