@@ -67,27 +67,41 @@ public class UserRepositoryTestcontainersIT {
 
     @Test
     public void testFindAll() {
-        User u1 = addTestUserToDatabase("Mario", "Rossi");
-        User u2 = addTestUserToDatabase("Luigi", "Verdi");
+        User user1 = addTestUserToDatabase("Mario", "Rossi");
+        User user2 = addTestUserToDatabase("Luigi", "Verdi");
 
         List<User> users = userRepository.findAll();
 
         assertThat(users).hasSize(2);
-        assertThat(users.get(0).getName()).isEqualTo(u1.getName());
-        assertThat(users.get(0).getSurname()).isEqualTo(u1.getSurname());
-        assertThat(users.get(1).getName()).isEqualTo(u2.getName());
-        assertThat(users.get(1).getSurname()).isEqualTo(u2.getSurname());
+        assertThat(users.get(0).getName()).isEqualTo(user1.getName());
+        assertThat(users.get(0).getSurname()).isEqualTo(user1.getSurname());
+        assertThat(users.get(1).getName()).isEqualTo(user2.getName());
+        assertThat(users.get(1).getSurname()).isEqualTo(user2.getSurname());
     }
 
     @Test
     public void testSaveUser() {
-        User u1 = addTestUserToDatabase("Mario", "Rossi");
+        User user = addTestUserToDatabase("Mario", "Rossi");
 
         List<User> users = userRepository.findAll();
 
         assertThat(users).hasSize(1);
-        assertThat(users.get(0).getName()).isEqualTo(u1.getName());
-        assertThat(users.get(0).getSurname()).isEqualTo(u1.getSurname());
+        assertThat(users.get(0).getName()).isEqualTo(user.getName());
+        assertThat(users.get(0).getSurname()).isEqualTo(user.getSurname());
+    }
+    
+    @Test
+    public void testModifyUser() {
+        User user = addTestUserToDatabase("Mario", "Rossi");
+        user.setName("Luigi");
+        user.setSurname("Verdi");
+
+        userRepository.update(user);
+        List<User> users = userRepository.findAll();
+
+        assertThat(users).hasSize(1);
+        assertThat(users.get(0).getName()).isEqualTo("Luigi");
+        assertThat(users.get(0).getSurname()).isEqualTo("Verdi");
     }
 
     @Test

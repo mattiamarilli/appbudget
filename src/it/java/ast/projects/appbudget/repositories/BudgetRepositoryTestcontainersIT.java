@@ -67,34 +67,48 @@ public class BudgetRepositoryTestcontainersIT {
 
     @Test
     public void testFindAll() {
-        Budget b1 = addTestBudgetToDatabase("testtitle1", 2000);
-        Budget b2 = addTestBudgetToDatabase("testtitle2", 1000);
+        Budget budget1 = addTestBudgetToDatabase("testtitle1", 2000);
+        Budget budget2 = addTestBudgetToDatabase("testtitle2", 1000);
 
         List<Budget> budgets = budgetRepository.findAll();
 
         assertThat(budgets).hasSize(2);
-        assertThat(budgets.get(0).getTitle()).isEqualTo(b1.getTitle());
-        assertThat(budgets.get(0).getIncomes()).isEqualTo(b1.getIncomes());
-        assertThat(budgets.get(1).getTitle()).isEqualTo(b2.getTitle());
-        assertThat(budgets.get(1).getIncomes()).isEqualTo(b2.getIncomes());
+        assertThat(budgets.get(0).getTitle()).isEqualTo(budget1.getTitle());
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(budget1.getIncomes());
+        assertThat(budgets.get(1).getTitle()).isEqualTo(budget2.getTitle());
+        assertThat(budgets.get(1).getIncomes()).isEqualTo(budget2.getIncomes());
     }
 
     @Test
     public void testSaveBudget() {
-        Budget b1 = addTestBudgetToDatabase("testtitle1", 2000);
+        Budget budget = addTestBudgetToDatabase("testtitle1", 2000);
 
         List<Budget> budgets = budgetRepository.findAll();
 
         assertThat(budgets).hasSize(1);
-        assertThat(budgets.get(0).getTitle()).isEqualTo(b1.getTitle());
-        assertThat(budgets.get(0).getIncomes()).isEqualTo(b1.getIncomes());
+        assertThat(budgets.get(0).getTitle()).isEqualTo(budget.getTitle());
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(budget.getIncomes());
+    }
+    
+    @Test
+    public void testModifyBudget() {
+    	Budget budget = addTestBudgetToDatabase("testtitle1", 2000);
+        budget.setTitle("testtitle2");
+        budget.setIncomes(1000);
+
+        budgetRepository.update(budget);
+        List<Budget> budgets = budgetRepository.findAll();
+
+        assertThat(budgets).hasSize(1);
+        assertThat(budgets.get(0).getTitle()).isEqualTo("testtitle2");
+        assertThat(budgets.get(0).getIncomes()).isEqualTo(1000);
     }
 
     @Test
     public void testDeleteBudget() {
-    	Budget b1 = addTestBudgetToDatabase("testtitle1", 2000);
+    	Budget budget = addTestBudgetToDatabase("testtitle1", 2000);
 
-        budgetRepository.delete(b1);
+        budgetRepository.delete(budget);
 
         List<Budget> budgets = budgetRepository.findAll();
         assertThat(budgets).isEmpty();

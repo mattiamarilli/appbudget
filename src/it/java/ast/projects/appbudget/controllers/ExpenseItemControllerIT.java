@@ -83,10 +83,10 @@ public class ExpenseItemControllerIT {
 
     @Test
     public void testNewExpenseItem() {
-    	Budget b = new Budget("testtitle",100);
-        new BudgetRepositorySqlImplementation(factory).save(b);
+    	Budget budget = new Budget("testtitle",100);
+    	budgetRepository.save(budget);
         ExpenseItem expenseItemToSave = new ExpenseItem("testtitle", Type.NEEDS ,10);
-        expenseItemToSave.setBudgetId(b.getId());
+        expenseItemToSave.setBudgetId(budget.getId());
         expenseItemController.addExpenseItem(expenseItemToSave);
         
         ExpenseItem expenseItem = expenseItemRepository.findAll().get(0);
@@ -105,11 +105,11 @@ public class ExpenseItemControllerIT {
     
     @Test
     public void testUpdateExpenseItem() {
-    	Budget b = new Budget("testtitle",100);
-        new BudgetRepositorySqlImplementation(factory).save(b);
+    	Budget budget = new Budget("testtitle",100);
+    	budgetRepository.save(budget);
         ExpenseItem expenseToUpdate = new ExpenseItem("testtitle", Type.NEEDS ,10);
-        expenseToUpdate.setBudgetId(b.getId());
-        expenseItemController.addExpenseItem(expenseToUpdate);
+        expenseToUpdate.setBudgetId(budget.getId());
+        expenseItemRepository.save(expenseToUpdate);
         expenseToUpdate.setTitle("testtitle2");
         expenseToUpdate.setType(Type.WANTS);
         expenseToUpdate.setAmount(20);
@@ -131,11 +131,11 @@ public class ExpenseItemControllerIT {
 
     @Test
     public void testDeleteBudget() {
-    	Budget b = new Budget("testtitle",100);
-        new BudgetRepositorySqlImplementation(factory).save(b);
+    	Budget budget = new Budget("testtitle",100);
+    	budgetRepository.save(budget);
     	ExpenseItem expenseToDelete = new ExpenseItem("testtitle", Type.NEEDS ,10);
-    	expenseToDelete.setBudgetId(b.getId());
-    	expenseItemController.addExpenseItem(expenseToDelete);
+    	expenseToDelete.setBudgetId(budget.getId());
+    	expenseItemRepository.save(expenseToDelete);
 
     	expenseItemController.deleteExpenseItem(expenseToDelete);
 
@@ -145,12 +145,12 @@ public class ExpenseItemControllerIT {
     
     @Test
     public void testAllExpenseItemsByBudget() {
-    	Budget b = new Budget("testtitle", 1000);
-    	budgetRepository.save(b);
+    	Budget budget = new Budget("testtitle", 1000);
+    	budgetRepository.save(budget);
     	ExpenseItem e = new ExpenseItem("testtitle",Type.NEEDS, 10);
-    	e.setBudgetId(b.getId());
+    	e.setBudgetId(budget.getId());
         expenseItemRepository.save(e);
-        expenseItemController.allExpenseItemsByBudget(b);
+        expenseItemController.allExpenseItemsByBudget(budget);
         verify(view).refreshExpenseItemsLists(
                 argThat(expenseItems -> expenseItems.size() == 1 &&
                 		expenseItems.get(0).getId() == 1 &&

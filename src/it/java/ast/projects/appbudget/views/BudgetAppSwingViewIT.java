@@ -287,6 +287,40 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.label("lblExpenseError").requireText("Error adding expense item");
 
 	}
+	
+	@Test
+	@GUITest
+	public void testModifyUserButtonSuccess() {
+		User user = new User(1, "testname1", "testsurname1");
+
+		GuiActionRunner.execute(() -> {
+			GuiActionRunner.execute(() -> userController.addUser(user));
+		});
+		
+		window.list("listUsers").selectItem(0);
+		window.textBox("textFieldUserName").setText("testname2");
+		window.textBox("textFieldUserSurname").setText("testsurname2");
+		window.button(JButtonMatcher.withText("Modify")).click();
+		assertThat(window.list("listUsers").contents()).containsExactly("testname2 testsurname2");
+	}
+
+	@Test
+	@GUITest
+	public void testModifyUserButtonError() {
+		User userFake = new User("testname", "testsurname");
+		
+		GuiActionRunner.execute(() -> {
+			budgetAppView.getListUsersModel().addElement(userFake);
+
+		});
+		
+		window.list("listUsers").selectItem(0);
+		
+		window.textBox("textFieldUserName").enterText("testname2");
+		window.textBox("textFieldUserSurname").enterText("testsurname2");
+		window.button(JButtonMatcher.withText("Modify")).click();
+		window.label("lblUserError").requireText("Error updating user");
+	}
 
 	@Test
 	@GUITest
@@ -303,8 +337,8 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.list("listUsers").selectItem(0);
 		window.button(JButtonMatcher.withText("Open Budgets")).click();
 		window.list("listBudgets").selectItem(0);
-		window.textBox("textFieldBudgetTitle").enterText("testtitle2");
-		window.textBox("textFieldBudgetIncomes").enterText("2000");
+		window.textBox("textFieldBudgetTitle").setText("testtitle2");
+		window.textBox("textFieldBudgetIncomes").setText("2000");
 		window.button(JButtonMatcher.withText("Modify Budget")).click();
 		assertThat(window.list("listBudgets").contents()).containsExactly("testtitle2" + " - " + "2000.0" + "$");
 	}
@@ -361,20 +395,20 @@ public class BudgetAppSwingViewIT extends AssertJSwingJUnitTestCase {
 		window.list("listBudgets").selectItem(0);
 		
 		window.list("listNeeds").selectItem(0);
-		window.textBox("textFieldExpenseItemTitle").enterText("testtitle1mod");
-		window.textBox("textFieldExpenseItemAmount").enterText("100");
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle1mod");
+		window.textBox("textFieldExpenseItemAmount").setText("100");
 		window.comboBox("comboBoxExpenseItemType").selectItem(0);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 		
 		window.list("listWants").selectItem(0);
-		window.textBox("textFieldExpenseItemTitle").enterText("testtitle2mod");
-		window.textBox("textFieldExpenseItemAmount").enterText("100");
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle2mod");
+		window.textBox("textFieldExpenseItemAmount").setText("100");
 		window.comboBox("comboBoxExpenseItemType").selectItem(1);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 		
 		window.list("listSavings").selectItem(0);
-		window.textBox("textFieldExpenseItemTitle").enterText("testtitle3mod");
-		window.textBox("textFieldExpenseItemAmount").enterText("100");
+		window.textBox("textFieldExpenseItemTitle").setText("testtitle3mod");
+		window.textBox("textFieldExpenseItemAmount").setText("100");
 		window.comboBox("comboBoxExpenseItemType").selectItem(2);
 		window.button(JButtonMatcher.withText("Modify Expense")).click();
 		
